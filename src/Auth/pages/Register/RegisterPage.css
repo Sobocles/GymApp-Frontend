@@ -1,0 +1,114 @@
+/* Estilo general del contenedor */
+.register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Ocupar toda la altura de la pantalla */
+}
+
+/* Estructura general del formulario */
+.register-form-2 {
+    width: 100%;
+    max-width: 450px; /* Limita el ancho máximo del formulario */
+    border-radius: 5px;
+    box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.2), 0 9px 26px 0 rgba(0, 0, 0, 0.19);
+    padding: 30px;
+    background-color: #ffffff;
+}
+
+/* Título del formulario */
+.register-form-2 h3 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Estilo de los inputs dentro del formulario */
+.register-form-2 .form-group input {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    width: 100%;
+    transition: border 0.3s ease;
+}
+
+/* Efecto hover en los inputs */
+.register-form-2 .form-group input:focus {
+    border: 1px solid #0062cc;
+    outline: none;
+}
+
+/* Estilo general de los botones */
+.btnSubmit {
+    border-radius: 1rem;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    margin: 10px 0;
+}
+
+/* Botón para registrar */
+.register-form-2 .btnSubmit {
+    color: #fff;
+    background-color: #28a745; /* Verde para diferenciar del login */
+}
+
+/* Estilo de los grupos de formulario */
+.form-group {
+    margin-bottom: 15px;
+}
+
+/* Contenido adicional (links, textos) */
+.register-container form {
+    padding: 10px;
+}
+
+/* Estilo para los enlaces */
+.link {
+    color: #0062cc;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
+/* Estilo para mensajes de error */
+.error-message {
+    color: #ff4d4d;
+    font-size: 0.9em;
+    margin-top: -10px;
+    margin-bottom: 10px;
+    text-align: left;
+}
+/* Agrupación del input y el ícono */
+.input-group {
+    position: relative; /* Esto asegura que el ícono se posicione dentro del contenedor del input */
+    display: flex;
+    align-items: center;
+}
+
+/* Alineación del ícono de ojo dentro del campo de contraseña */
+.input-group .input-group-text {
+    position: absolute; /* El ícono se posiciona absolutamente dentro del contenedor relativo */
+    right: 10px; /* Margen derecho para el ícono */
+    top: 50%; /* Coloca el ícono en el centro vertical del input */
+    transform: translateY(-50%); /* Ajusta la posición vertical al centro exacto */
+    background-color: transparent; /* Elimina cualquier fondo por defecto del ícono */
+    border: none; /* Sin borde */
+    cursor: pointer; /* El cursor cambia al puntero cuando se pasa sobre el ícono */
+    font-size: 1.2rem; /* Tamaño del ícono */
+}
+
+/* Aumentar el padding del input para evitar que el texto se superponga con el ícono */
+.input-group input {
+    padding-right: 40px; /* Espacio suficiente para el ícono */
+}
+
+/* Mantener el estilo del input cuando está enfocado */
+.input-group input:focus {
+    border-color: #0062cc; /* Color del borde al enfocar */
+    outline: none;
+}
+
