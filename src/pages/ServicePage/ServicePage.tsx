@@ -1,5 +1,3 @@
-// src/pages/ServicePage/ServicePage.tsx
-
 import React, { useEffect, useState } from 'react';
 
 import {
@@ -22,14 +20,13 @@ interface Plan {
   name: string;
   price: number;
   description?: string;
-  discount?: number; // Opcional, si hay descuento
+  discount?: number;
 }
 
 const ServicePage = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Obtener el estado de autenticación y el token
   const { isAuth, token } = useSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,9 +35,6 @@ const ServicePage = () => {
     const fetchPlans = async () => {
       try {
         const response = await apiClient.get('/plans');
-        console.log('Response Data:', response.data);
-        console.log('Is Array:', Array.isArray(response.data));
-        console.log('Type of response.data:', typeof response.data);
         setPlans(response.data);
       } catch (error) {
         console.error('Error fetching plans:', error);
@@ -52,46 +46,51 @@ const ServicePage = () => {
     fetchPlans();
   }, []);
 
- 
-
-const handleSubscribe = async (planId: number) => {
-  if (!isAuth) {
-    alert('Por favor, inicia sesión para continuar.');
-    navigate('/auth/login', { state: { from: location.pathname } });
-    return;
-  }
-
-  try {
-    if (!token) {
-      alert('Token no encontrado. Por favor, inicia sesión nuevamente.');
+  const handleSubscribe = async (planId: number) => {
+    if (!isAuth) {
+      alert('Por favor, inicia sesión para continuar.');
       navigate('/auth/login', { state: { from: location.pathname } });
       return;
     }
 
-    // Configurar los headers con el token
-    const config = {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    };
+    try {
+      if (!token) {
+        alert('Token no encontrado. Por favor, inicia sesión nuevamente.');
+        navigate('/auth/login', { state: { from: location.pathname } });
+        return;
+      }
 
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      };
 
-    // Realizar la solicitud al backend
-    const response = await apiClient.post(`/payment/create_preference?planId=${planId}`,
-      {}, // Si no envías datos en el cuerpo, puedes pasar un objeto vacío
-      config
-    );
+      // Aquí se compra solo el plan
+      const response = await apiClient.post(`/payment/create_preference?planId=${planId}`,
+        {},
+        config
+      );
 
+      const preference = response.data;
+      window.location.href = preference.initPoint;
+    } catch (error) {
+      console.error('Error al crear la preferencia de pago:', error);
+      alert('Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.');
+    }
+  };
 
-    const preference = response.data;
-    window.location.href = preference.initPoint;
-  } catch (error) {
-    console.error('Error al crear la preferencia de pago:', error);
-    alert('Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.');
-  }
-};
+  const handlePlanPlusTrainer = (planId: number) => {
+    if (!isAuth) {
+      alert('Por favor, inicia sesión para continuar.');
+      navigate('/auth/login', { state: { from: location.pathname } });
+      return;
+    }
 
+    // Aquí no compramos directo. Vamos a la página de elegir entrenador.
+    navigate(`/personal-trainer?planId=${planId}`);
+  };
 
   if (loading) {
     return <Typography>Cargando planes...</Typography>;
@@ -109,7 +108,7 @@ const handleSubscribe = async (planId: number) => {
               <CardMedia
                 component="img"
                 height="140"
-                image={`/images/plans/plan-${plan.id}.jpg`} // Asegúrate de tener imágenes para los planes
+                image={`/images/plans/plan-${plan.id}.jpg`}
                 alt={plan.name}
               />
               <CardContent>
@@ -129,8 +128,7 @@ const handleSubscribe = async (planId: number) => {
                       Precio: ${plan.price}
                     </Typography>
                     <Typography variant="h6" color="error">
-                      Precio con descuento: $
-                      {plan.price - plan.price * (plan.discount / 100)}
+                      Precio con descuento: ${plan.price - plan.price * (plan.discount / 100)}
                     </Typography>
                     <Typography variant="body1" color="error">
                       Descuento: {plan.discount}%
@@ -149,7 +147,17 @@ const handleSubscribe = async (planId: number) => {
                   fullWidth
                   onClick={() => handleSubscribe(plan.id)}
                 >
-                  Suscribirse
+                  Comprar solo el Plan
+                </Button>
+              </CardActions>
+              <CardActions>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  fullWidth
+                  onClick={() => handlePlanPlusTrainer(plan.id)}
+                >
+                  Comprar Plan + Personal Trainer
                 </Button>
               </CardActions>
             </Card>

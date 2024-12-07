@@ -25,6 +25,8 @@ export const useAuth = () => {
     try {
       const response = await loginUser({ email, password });
 
+      console.log("ACA LA OTRA RESPONSE",response);
+
       const token = response.data.token;
       const claims = JSON.parse(window.atob(token.split(".")[1]));
 

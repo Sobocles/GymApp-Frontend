@@ -8,7 +8,9 @@ import { LoginCredentials } from '../Interfaces/AuthInterface';
 export const loginUser = async ({ email, password }: LoginCredentials) => {
   try {
     const response = await apiClient.post('/login', { email, password });
-    return response.data;
+    console.log("ACA RESPONSE",response);
+    console.log("ACA DATA",response.data);
+    return response;
   } catch (error) {
     handleApiError(error);
   }

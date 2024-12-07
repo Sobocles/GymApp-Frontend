@@ -4,7 +4,8 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Link, useNavigate } from 'react-router-dom';
 import './RegisterPage.css';
-import { register } from '../../services/authService';
+import { registerUser } from '../../services/authService';
+
 
 export const RegistrationPage = () => {
     const navigate = useNavigate();
@@ -32,7 +33,7 @@ export const RegistrationPage = () => {
         }),
         onSubmit: async (values) => {
             try {
-                await register({
+                await registerUser({
                     username: values.username,
                     email: values.email,
                     password: values.password,

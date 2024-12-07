@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL, // Usa la variable de entorno
+  baseURL: import.meta.env.VITE_API_BASE_URL,
 });
 
 // Interceptor para agregar el token de autenticación en cada solicitud

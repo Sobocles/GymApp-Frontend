@@ -22,6 +22,7 @@ import ProtectedLayout from '../components/layout/ProtectedLayout';
 import { TrainerProfileEditPage } from '../Trainers/pages/TrainerProfileEditPage';
 import { LoginPage } from '../Auth/pages';
 import PaymentSuccessPage from '../Users/pages/mercadoPago/PaymentSuccessPage';
+import PersonalTrainerPage from '../pages/personalTrainer/PersonalTrainer';
 
 export const AppRouter = () => {
   const { isAuth } = useSelector((state: RootState) => state.auth);
@@ -36,6 +37,7 @@ export const AppRouter = () => {
         <Route path="auth/login" element={<LoginPage />} />
         <Route path="auth/register" element={<RegistrationPageRedirect />} />
         <Route path="/success" element={<PaymentSuccessPage />} />
+        <Route path="personal-trainer" element={<PersonalTrainerPage />} />
 
       </Route>
 
