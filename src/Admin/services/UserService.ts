@@ -2,7 +2,7 @@ import apiClient  from "../../Apis/apiConfig";
 import { UserInterface } from '../../Auth/Interfaces/UserInterface';
 
 
-const BASE_URL = '';
+const BASE_URL = '/users';
 
 export const findAll = async() => {
   try {
@@ -33,9 +33,20 @@ export const findAllPages = async (page = 0, search = '') => {
 };
   
 
-export const save = async ({ username, email, password, admin, trainer }: UserInterface) => {
-    return await apiClient.post(BASE_URL, { username, email, password, admin, trainer });
-  };
+export const save = async (user: UserInterface) => {
+  const { trainerDetails, ...userData } = user;
+  console.log("aqui los datos de usuario",userData);
+  console.log("aqui los datos de trainer",trainerDetails);
+  
+  const response = await apiClient.post(BASE_URL, {
+    ...userData,
+    ...(trainerDetails ? trainerDetails : {}),
+  });
+  console.log("AQUI ESTA LA RESPUESTA",response);
+
+  return response;
+};
+
   
   export const update = async ({ id, username, email, admin, trainer }: UserInterface) => {
     return await apiClient.put(`${BASE_URL}/${id}`, { username, email, admin, trainer });

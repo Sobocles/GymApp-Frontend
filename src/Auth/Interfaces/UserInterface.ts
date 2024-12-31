@@ -6,17 +6,31 @@ export interface Role {
   authority: string;
 }
 
+export interface TrainerDetails {
+  specialization?: string;
+  experienceYears?: number;
+  availability?: boolean;
+  monthlyFee?: number;
+  title?: string;
+  studies?: string;
+  certifications?: string;
+  description?: string;
+}
+
 export interface UserInterface {
-  id: string;
+  id: number;
   username: string;
-  password?: string;   // Ahora opcional
+  password?: string;
   email: string;
   admin: boolean;
-  trainer?: boolean;   // Ahora opcional
+  trainer?: boolean;
   role?: Role | string;
-  roles?: Role[];      // Ahora opcional
+  roles?: Role[];
   profileImageUrl?: string;
+  // Detalles específicos de entrenadores
+  trainerDetails?: TrainerDetails;
 }
+
 
 
 

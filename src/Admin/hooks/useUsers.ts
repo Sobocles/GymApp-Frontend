@@ -1,146 +1,102 @@
+// src/Admin/hooks/useUsers.ts
 
-import Swal from "sweetalert2";
-import {  findAllPages, remove, save, update } from "../services/UserService";
-import { useDispatch, useSelector } from "react-redux";
-import { initialUserForm, addUser, removeUser, updateUser, updatePaginator, loadingUsers, onUserSelectedForm, onOpenForm, onCloseForm, loadingError, initialErrors } from "../store/users/usersSlice";
-import { useAuth } from "../../Auth/hooks/useAuth";
-import { RootState } from "../../store";
-import { UserInterface } from "../../Auth/Interfaces/UserInterface"
-import { useEffect } from "react";
-import { useSearch } from "./useSearch";
-import { UserState } from "../../Admin/interface/Usertate"
-
-interface ErrorResponse {
-    status: number;
-    data: {
-        message?: string;
-    };
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { addUser, removeUser, updateUser, loadingUsers, onUserSelectedForm, onOpenForm, onCloseForm, loadingError, updatePaginator } from '../../Admin/store/users/usersSlice';
+import { UserInterface } from '../../Auth/Interfaces/UserInterface';
+import * as userService from '../../Admin/services/UserService';
+import { useState } from 'react';
+import apiClient from '../../Apis/apiConfig';
 
 export const useUsers = () => {
-    
-    const { users, userSelected, visibleForm, errors,  paginator } = useSelector((state: RootState) => state.users);
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
+  const { users, paginator, visibleForm, userSelected, errors, isLoading } = useSelector((state: any) => state.users);
+  const [searchTerm, setSearchTerm] = useState('');
 
-    const { searchTerm, setSearchTerm } = useSearch();
+  const getUsers = async (page: number) => {
+    try {
+      const response = await userService.findAllPages(page, searchTerm);
+      dispatch(loadingUsers(response.data.content));
+      dispatch(updatePaginator({
+        number: response.data.number,
+        totalPages: response.data.totalPages,
+        first: response.data.first,
+        last: response.data.last,
+      }));
+    } catch (error) {
+      console.error(error);
+      dispatch(loadingError({ errorMessage: 'Error al cargar usuarios' }));
+    }
+  };
 
-    const { login, handlerLogout } = useAuth();
+  const handlerOpenForm = () => {
+    dispatch(onOpenForm());
+  };
 
-    const getUsers = async (page = 0) => {
-      try {
-        
-        const result = await findAllPages(page, searchTerm);
-    
-        const usersData = result.data.content;
-        const paginatorData = {
-          number: result.data.number,
-          totalPages: result.data.totalPages,
-          first: result.data.first,
-          last: result.data.last,
+  const handlerCloseForm = () => {
+    dispatch(onCloseForm());
+  };
+
+  const handlerUserSelectedForm = (user: UserInterface) => {
+    dispatch(onUserSelectedForm(user));
+  };
+
+  const handlerAddUser = async (user: UserInterface) => {
+    try {
+      // Crear el usuario
+      const response = await userService.save(user);
+      const createdUser = response.data;
+
+      dispatch(addUser(createdUser));
+
+      // Si el usuario es un trainer, asignar el rol de trainer y crear PersonalTrainer
+      if (user.trainer) {
+        const trainerData = {
+          specialization: (user as any).specialization,
+          experienceYears: (user as any).experienceYears,
+          availability: (user as any).availability,
+          monthlyFee: (user as any).monthlyFee,
+          title: (user as any).title,
+          studies: (user as any).studies,
+          certifications: (user as any).certifications,
+          description: (user as any).description,
         };
-        dispatch(loadingUsers(usersData));
-        dispatch(updatePaginator(paginatorData));
 
-      } catch (error) {
-        console.error("[useUsers] Error al obtener usuarios:", error);
-
+        await apiClient.post(`/trainers/${createdUser.id}/assign`, trainerData);
       }
-    };
-  
-    useEffect(() => {
-      console.log("[useUsers] useEffect - paginator.number:", paginator.number, "searchTerm:", searchTerm);
-      getUsers(paginator.number);
-    }, [paginator.number, searchTerm]); // getUsers se llama cada vez que cambia paginator.number o searchTerm
-  
 
-    const handlerAddUser = async (user: UserInterface) => {
-        try {
-          let response;
-          if (!user.id) {
-            // Crear nuevo usuario
-            response = await save(user);
-            dispatch(addUser(response.data));
-          } else {
-            // Actualizar usuario existente
-            response = await update(user);
-            dispatch(updateUser(response.data));
-          }
-          handlerCloseForm();
-        } catch (error) {
-          // Manejo de errores
-          console.error(error);
-        }
-      };
-      
-    const handlerRemoveUser = (id: string) => {
-        if (!login.isAdmin) return;
-    
-        Swal.fire({
-            title: '¿Está seguro que desea eliminar?',
-            text: "¡Cuidado, el usuario será eliminado!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Sí, eliminar!'
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    await remove(id);
-                    dispatch(removeUser(id));
-    
-                    Swal.fire(
-                        'Usuario Eliminado!',
-                        '¡El usuario ha sido eliminado con éxito!',
-                        'success'
-                    );
-                } catch (error: unknown) {
-                    if (error instanceof Error && 'response' in error) {
-                        const response = (error as { response: ErrorResponse }).response;
-    
-                        if (response.status === 401) {
-                            handlerLogout();
-                        }
-                    } else {
-                        console.error("Unknown error:", error);
-                    }
-                }
-            }
-        });
-    };
-    
+    } catch (error: any) {
+      console.error(error);
+      if (error.response && error.response.data) {
+        dispatch(loadingError({ errorMessage: error.response.data.message || 'Error al crear usuario' }));
+      } else {
+        dispatch(loadingError({ errorMessage: 'Error al crear usuario' }));
+      }
+    }
+  };
 
-    const handlerUserSelectedForm = (user: UserInterface) => {
-        const userWithPassword: UserState = { ...user, password: user.password ?? '' };
-        console.log("AAAAAAAAAAAAAAA",userWithPassword);
-        dispatch(onUserSelectedForm(userWithPassword));
+  const handlerRemoveUser = async (id: string) => {
+    try {
+      await userService.remove(id);
+      dispatch(removeUser(id));
+    } catch (error) {
+      console.error(error);
+      dispatch(loadingError({ errorMessage: 'Error al eliminar usuario' }));
     }
-    
-    
+  };
 
-    const handlerOpenForm = () => {
-        dispatch(onOpenForm());
-    }
-
-    const handlerCloseForm = () => {
-        dispatch(onCloseForm());
-        dispatch(loadingError({}));
-    }
-    return {
-        users,
-        userSelected,
-        initialUserForm,
-        visibleForm,
-        errors,
-        paginator,
-        handlerAddUser,
-        handlerRemoveUser,
-        handlerUserSelectedForm,
-        handlerOpenForm,
-        handlerCloseForm,
-        getUsers,
-        searchTerm,
-        setSearchTerm,
-        
-    }
-} 
+  return {
+    users,
+    visibleForm,
+    handlerOpenForm,
+    handlerCloseForm,
+    handlerUserSelectedForm,
+    handlerAddUser,
+    handlerRemoveUser,
+    paginator,
+    searchTerm,
+    setSearchTerm,
+    getUsers,
+    errors,
+    isLoading,
+  };
+};

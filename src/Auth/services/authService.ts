@@ -22,27 +22,34 @@ export const registerUser = async (userData: {
   password: string;
 }) => {
   try {
-    const response = await apiClient.post('/register', userData);
+    console.log("AAAAAAAAAA",userData);
+    const response = await axios.post('http://localhost:8080/users/register', userData, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    console.log("AQUI LA RESPUESTA DEL REGISTER", response);
     return response.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
-// Función para manejar errores de la API
+// Función para manejar errores
 const handleApiError = (error: unknown) => {
   if (axios.isAxiosError(error)) {
     if (error.response) {
+      console.error(`Error ${error.response.status}: ${error.response.data.message || 'Error en el servidor'}`);
       throw new Error(
         `Error ${error.response.status}: ${
           error.response.data.message || 'Error en el servidor'
         }`
       );
     } else if (error.request) {
-      throw new Error(
-        'No se recibió respuesta del servidor. Verifica tu conexión.'
-      );
+      console.error('No se recibió respuesta del servidor. Verifica tu conexión.');
+      throw new Error('No se recibió respuesta del servidor. Verifica tu conexión.');
     }
   }
+  console.error('Ocurrió un error desconocido.');
   throw new Error('Ocurrió un error desconocido.');
 };

@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 import { loginUser } from '../services/authService';
 import { useDispatch, useSelector } from 'react-redux';
 import { onLogin, onLogout } from '../store/auth/authSlice';
-import { LoginCredentials } from '../Interfaces/AuthInterface';
+
 import { RootState } from '../../store';
 import { AxiosError } from 'axios';
 import { UserInterface } from '../Interfaces/UserInterface';
@@ -25,12 +25,12 @@ export const useAuth = () => {
     try {
       const response = await loginUser({ email, password });
 
-      console.log("ACA LA OTRA RESPONSE",response);
+      console.log("ACA LA OTRA RESPONSE", response);
 
       const token = response.data.token;
       const claims = JSON.parse(window.atob(token.split(".")[1]));
 
-      console.log('Claims:', claims);
+      console.log('ACA LOS CLAMIS Claims:', claims);
       console.log('Authorities:', claims.authorities);
 
       // Extraer roles
@@ -63,8 +63,8 @@ export const useAuth = () => {
 
       const user: UserInterface = {
         id: claims.id || '', // ID si está disponible
-        username: claims.sub,
-        email: claims.username || email,
+        username: claims.username || '', // Asignar correctamente el nombre de usuario
+        email: claims.sub || email,      // Asignar correctamente el correo electrónico
         admin: claims.isAdmin || false,
         trainer: claims.isTrainer || false,
         roles: rolesArray.map(role => ({ authority: role })),
@@ -88,8 +88,8 @@ export const useAuth = () => {
       if (from) {
         navigate(from);
       } else if (user.admin) {
-        console.log("Navegando a /admin/users para admin");
-        navigate('/admin/users');
+        console.log("Navegando a /admin/dashboard para admin");
+        navigate('/admin/dashboard');
       } else if (user.trainer) {
         console.log("Navegando a /trainers para entrenador");
         navigate('/trainers');
@@ -97,6 +97,7 @@ export const useAuth = () => {
         console.log("Navegando a /dashboard para usuarios regulares");
         navigate('/dashboard');
       }
+      
 
     } catch (error: unknown) {
       console.error("Error en el login:", error);
@@ -132,4 +133,9 @@ export const useAuth = () => {
     handlerLogin,
     handlerLogout,
   };
-};
+}; 
+
+export interface LoginCredentials {
+    password: string;
+    email: string;
+}

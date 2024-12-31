@@ -1,5 +1,3 @@
-// src/components/layout/Navbar/Navbar.tsx
-
 import React from 'react';
 import { AppBar, Toolbar, Typography, IconButton, Button } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -16,7 +14,6 @@ const Navbar: React.FC = () => {
           color="inherit"
           aria-label="open drawer"
           edge="start"
-          // onClick={handleDrawerToggle} // Si tienes una función para manejar esto
           sx={{ mr: 2, display: { sm: 'none' } }}
         >
           <MenuIcon />
@@ -24,6 +21,13 @@ const Navbar: React.FC = () => {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           GymApp
         </Typography>
+        
+        {login.isAuth && login.user && (
+          <Typography variant="body1" sx={{ marginRight: 2 }}>
+            {`Hola, ${login.user.username}`}
+          </Typography>
+        )}
+
         {login.isAuth && (
           <Button color="inherit" onClick={handlerLogout}>
             Cerrar Sesión

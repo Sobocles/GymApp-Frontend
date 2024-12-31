@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
 import {
   Box,
   Grid,
@@ -67,7 +66,6 @@ const ServicePage = () => {
         },
       };
 
-      // Aquí se compra solo el plan
       const response = await apiClient.post(`/payment/create_preference?planId=${planId}`,
         {},
         config
@@ -87,9 +85,19 @@ const ServicePage = () => {
       navigate('/auth/login', { state: { from: location.pathname } });
       return;
     }
-
-    // Aquí no compramos directo. Vamos a la página de elegir entrenador.
+    // Redirige a escoger entrenador con plan
     navigate(`/personal-trainer?planId=${planId}`);
+  };
+
+  // NUEVO: Agregamos un handler para solo entrenador
+  const handleOnlyTrainer = () => {
+    if (!isAuth) {
+      alert('Por favor, inicia sesión para continuar.');
+      navigate('/auth/login', { state: { from: location.pathname } });
+      return;
+    }
+    // Redirige a escoger entrenador sin plan (onlyTrainer=true)
+    navigate(`/personal-trainer?onlyTrainer=true`);
   };
 
   if (loading) {
@@ -164,6 +172,14 @@ const ServicePage = () => {
           </Grid>
         ))}
       </Grid>
+      
+      {/* NUEVO: Botón para contratar solo entrenador sin plan */}
+      <Box sx={{ marginTop: 4, textAlign: 'center' }}>
+        <Typography variant="h5">¿Quieres solo un entrenador personal?</Typography>
+        <Button variant="contained" color="primary" onClick={handleOnlyTrainer}>
+          Contratar Sólo Personal Trainer
+        </Button>
+      </Box>
     </Box>
   );
 };

@@ -1,15 +1,18 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useAuth } from "../../Auth/hooks/useAuth";
 import { useUsers } from "../hooks/useUsers";
 import { UserModalForm } from "../components/useModalForm";
 import { UsersList } from "../components/UsersList";
 import { Box, Button, Typography } from '@mui/material';
-import { useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Paginator } from "../components/Paginator";
 import SearchBar from "../../components/common/SearchBar";
 
 export const UsersPage = () => {
-    const { page } = useParams(); // obtiene el parámetro de la ruta como string
+    const location = useLocation();  // Obtenemos la ubicación actual
+    const queryParams = new URLSearchParams(location.search);
+const page = parseInt(queryParams.get('page') || '0', 10);
+
 
     const {
         users,
@@ -24,10 +27,8 @@ export const UsersPage = () => {
     const { login } = useAuth();
 
     useEffect(() => {
-        // Convertir 'page' a número antes de pasarlo a getUsers
-        const pageNumber = page ? parseInt(page, 10) : 0;
-        getUsers(pageNumber);
-    }, [page]);
+        getUsers(page);  // Llamamos a getUsers con la página correcta
+    }, [page, searchTerm]);  // Escuchamos los cambios de página y términos de búsqueda
 
     return (
         <>
@@ -61,7 +62,16 @@ export const UsersPage = () => {
                 <UsersList />
                 {/* Mostrar el paginador solo si no hay término de búsqueda */}
                 {searchTerm === '' && (
-                  <Paginator url="/admin/users/page" paginator={paginator} />
+                  <Paginator
+                  url="/admin/users"
+                  paginator={{
+                    number: paginator.number,
+                    totalPages: paginator.totalPages,
+                    first: paginator.first,
+                    last: paginator.last,
+                  }}
+                />
+                
                 )}
               </>
             )}

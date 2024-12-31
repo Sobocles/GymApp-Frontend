@@ -1,4 +1,3 @@
-// src/pages/personalTrainer/PersonalTrainer.tsx
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Box, Typography, Grid, Card, CardContent, CardActions, CardMedia, Button } from '@mui/material';
@@ -27,6 +26,7 @@ const PersonalTrainerPage = () => {
 
   const [searchParams] = useSearchParams();
   const planId = searchParams.get('planId');
+  const onlyTrainer = searchParams.get('onlyTrainer') === 'true'; // NUEVO: Leemos el modo onlyTrainer
 
   const { isAuth, token } = useSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
@@ -51,6 +51,7 @@ const PersonalTrainerPage = () => {
   const handleHireTrainer = async (trainerId: number) => {
     console.log("handleHireTrainer - trainerId seleccionado:", trainerId);
     console.log("handleHireTrainer - planId actual:", planId);
+    console.log("handleHireTrainer - onlyTrainer:", onlyTrainer);
   
     if (!isAuth) {
       console.log("handleHireTrainer - Usuario no autenticado, redirigiendo a login.");
@@ -66,18 +67,22 @@ const PersonalTrainerPage = () => {
       return;
     }
   
-    if (!planId) {
-      console.log("handleHireTrainer - No se encontró el planId en el frontend.");
-      alert('No se encontró el plan. Por favor, regresa y selecciona un plan.');
-      navigate('/services');
-      return;
+    // Construimos la URL de la preferencia dependiendo del modo
+    let url = '/payment/create_preference';
+    if (onlyTrainer) {
+      url += `?trainerId=${trainerId}&onlyTrainer=true`;
+    } else {
+      if (!planId) {
+        console.log("handleHireTrainer - No se encontró el planId en modo plan+trainer.");
+        alert('No se encontró el plan. Por favor, regresa y selecciona un plan.');
+        navigate('/services');
+        return;
+      }
+      url += `?planId=${planId}&trainerId=${trainerId}`;
     }
   
     try {
-      console.log("handleHireTrainer - Enviando petición a /payment/create_preference con planId y trainerId...", {
-        planId,
-        trainerId
-      });
+      console.log("handleHireTrainer - Enviando petición a:", url);
   
       const config = {
         headers: {
@@ -86,14 +91,10 @@ const PersonalTrainerPage = () => {
         },
       };
   
-      const response = await apiClient.post(
-        `/payment/create_preference?planId=${planId}&trainerId=${trainerId}`,
-        {},
-        config
-      );
-  
+      const response = await apiClient.post(url, {}, config);
       console.log("handleHireTrainer - Respuesta del backend:", response.data);
       const preference = response.data;
+      console.log(preference);
       window.location.href = preference.initPoint;
     } catch (error) {
       console.log("handleHireTrainer - Error al crear la preferencia de pago:", error);
@@ -110,9 +111,17 @@ const PersonalTrainerPage = () => {
       <Typography variant="h4" gutterBottom align="center">
         Selecciona tu Entrenador Personal
       </Typography>
-      <Typography variant="body1" align="center" sx={{ mb:4 }}>
-        Has seleccionado el plan con ID: {planId}. Ahora elige el entrenador que más se ajuste a tus necesidades.
-      </Typography>
+      
+      {/* Mostramos mensaje diferente dependiendo del modo */}
+      {onlyTrainer ? (
+        <Typography variant="body1" align="center" sx={{ mb:4 }}>
+          Has elegido contratar sólo el servicio de entrenador personal. Selecciona el entrenador que desees.
+        </Typography>
+      ) : (
+        <Typography variant="body1" align="center" sx={{ mb:4 }}>
+          Has seleccionado el plan con ID: {planId}. Ahora elige el entrenador que más se ajuste a tus necesidades.
+        </Typography>
+      )}
 
       <Grid container spacing={4}>
         {trainers.map((trainer) => (
@@ -122,7 +131,6 @@ const PersonalTrainerPage = () => {
                 component="img"
                 height="240"
                 image={`${trainer.profileImageUrl}?random=${Math.random()}`}
-
                 alt={trainer.username}
                 sx={{ objectFit: 'cover' }}
               />
@@ -156,7 +164,7 @@ const PersonalTrainerPage = () => {
                   fullWidth
                   onClick={() => handleHireTrainer(trainer.id)}
                 >
-                  Contratar Entrenador
+                  {onlyTrainer ? 'Contratar Entrenador' : 'Contratar Plan + Entrenador'}
                 </Button>
               </CardActions>
             </Card>

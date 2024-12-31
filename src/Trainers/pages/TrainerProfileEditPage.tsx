@@ -14,6 +14,11 @@ export const TrainerProfileEditPage: React.FC = () => {
   const { login } = useAuth();
   const dispatch = useDispatch();
 
+  // Usar useEffect fuera del render prop de Formik
+  useEffect(() => {
+    console.log('Login User:', login.user);
+  }, [login.user]);
+
   // Esquema de validación con Yup
   const validationSchema = Yup.object({
     username: Yup.string().required('El nombre de usuario es requerido'),
@@ -54,7 +59,6 @@ export const TrainerProfileEditPage: React.FC = () => {
       // Actualizar el estado global con los nuevos datos del usuario
       dispatch(updateProfile(updatedUser));
 
-
       Swal.fire({
         icon: 'success',
         title: 'Perfil actualizado',
@@ -82,8 +86,10 @@ export const TrainerProfileEditPage: React.FC = () => {
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
+        enableReinitialize // Habilita la re-inicialización cuando initialValues cambian
       >
-        {({ setFieldValue, values, isSubmitting }) => {
+        {({ setFieldValue, values, isSubmitting, errors, touched }) => {
+          // Opcional: Manejar la creación y limpieza de URLs de objetos aquí si es necesario
           useEffect(() => {
             if (values.file) {
               const objectUrl = URL.createObjectURL(values.file);
@@ -100,7 +106,7 @@ export const TrainerProfileEditPage: React.FC = () => {
                 fullWidth
                 margin="normal"
                 helperText={<ErrorMessage name="username" />}
-                error={Boolean(<ErrorMessage name="username" />)}
+                error={touched.username && Boolean(errors.username)}
               />
               <Field
                 as={TextField}
@@ -110,7 +116,7 @@ export const TrainerProfileEditPage: React.FC = () => {
                 fullWidth
                 margin="normal"
                 helperText={<ErrorMessage name="email" />}
-                error={Boolean(<ErrorMessage name="email" />)}
+                error={touched.email && Boolean(errors.email)}
               />
               <Field
                 as={TextField}
@@ -120,7 +126,7 @@ export const TrainerProfileEditPage: React.FC = () => {
                 fullWidth
                 margin="normal"
                 helperText={<ErrorMessage name="password" />}
-                error={Boolean(<ErrorMessage name="password" />)}
+                error={touched.password && Boolean(errors.password)}
               />
 
               <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>

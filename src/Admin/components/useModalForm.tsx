@@ -7,15 +7,29 @@ import CloseIcon from '@mui/icons-material/Close';
 export const UserModalForm = () => {
   const { userSelected, visibleForm, handlerCloseForm, handlerAddUser } = useUsers();
 
+  const validUserSelected = userSelected || {
+    id: '',
+    username: '',
+    email: '',
+    password: '',
+    admin: false,
+    trainer: false,
+    role: '',
+    roles: []
+  };
+
   const style = {
     position: 'absolute' as const,
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 400,
+    width: '90%', // Ajustar el ancho para pantallas más pequeñas
+    maxWidth: 600, // Ancho máximo del modal
     bgcolor: 'background.paper',
     boxShadow: 24,
     p: 4,
+    overflowY: 'auto', // Habilitar desplazamiento vertical
+    maxHeight: '80vh', // Altura máxima relativa a la ventana
   };
 
   return (
@@ -28,7 +42,7 @@ export const UserModalForm = () => {
       <Box sx={style}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography id="modal-title" variant="h6" component="h2">
-            {userSelected.id ? 'Editar' : 'Crear'} Usuario
+            {validUserSelected.id ? 'Editar' : 'Crear'} Usuario
           </Typography>
           <IconButton aria-label="close" onClick={handlerCloseForm}>
             <CloseIcon />
@@ -36,7 +50,7 @@ export const UserModalForm = () => {
         </Box>
         <Box id="modal-description" sx={{ mt: 2 }}>
           <UserForm
-            userSelected={userSelected}
+            userSelected={validUserSelected} // Pasar un valor válido
             handlerAddUser={handlerAddUser}
             handlerCloseForm={handlerCloseForm}
           />

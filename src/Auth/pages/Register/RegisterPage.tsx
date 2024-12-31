@@ -27,9 +27,7 @@ export const RegistrationPage = () => {
             password: Yup.string()
                 .min(6, 'La contraseña debe tener al menos 6 caracteres')
                 .required('Requerido'),
-            confirmPassword: Yup.string()
-                .oneOf([Yup.ref('password'), null], 'Las contraseñas deben coincidir')
-                .required('Requerido'),
+        
         }),
         onSubmit: async (values) => {
             try {
@@ -89,15 +87,7 @@ export const RegistrationPage = () => {
                         </div>
 
                         <div className="form-group mb-2">
-                            <input
-                                type="password"
-                                className={`form-control ${formik.touched.confirmPassword && formik.errors.confirmPassword ? 'is-invalid' : ''}`}
-                                placeholder="Confirmar Contraseña"
-                                {...formik.getFieldProps('confirmPassword')}
-                            />
-                            {formik.touched.confirmPassword && formik.errors.confirmPassword && (
-                                <div className="invalid-feedback">{formik.errors.confirmPassword}</div>
-                            )}
+                        
                         </div>
 
                         <div className="d-grid gap-2">

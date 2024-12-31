@@ -18,6 +18,7 @@ const PaymentSuccessPage = () => {
     console.log("AQUI LOS PARAMS",params);
     const paymentId = params.get('payment_id');
     const status = params.get('status');
+    console.log("AQUI EL STATUS",status);
     const externalReference = params.get('external_reference');
     // Otros parámetros que necesites
 
