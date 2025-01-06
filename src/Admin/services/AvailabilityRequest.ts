@@ -1,10 +1,19 @@
 // src/Admin/services/availabilityService.ts
+
 import apiClient from '../../Apis/apiConfig';
 
 export interface PersonalTrainerDto {
   id: number;
   username: string;
   email: string;
+  specialization: string;
+  experienceYears: number;
+  availability: boolean;
+  profileImageUrl: string;
+  title: string;
+  studies: string;
+  certifications: string;
+  description: string;
 }
 
 export interface TrainerAvailabilityRequest {
@@ -13,15 +22,14 @@ export interface TrainerAvailabilityRequest {
   endTime: string;   // "HH:mm"
 }
 
-export const fetchAvailableTrainers = async (): Promise<PersonalTrainerDto[]> => {
-  const response = await apiClient.get('/trainers/available');
-  return response.data;
-};
-
-export const createTrainerAvailability = async (
-  trainerId: number | string,
-  requestBody: TrainerAvailabilityRequest
-): Promise<string> => {
-  const response = await apiClient.post(`/trainer-schedule/${trainerId}/availability`, requestBody);
+export const fetchAvailableTrainers = async (
+  day: string,        // "YYYY-MM-DD"
+  startTime: string,  // "HH:mm"
+  endTime: string     // "HH:mm"
+): Promise<PersonalTrainerDto[]> => {
+  const response = await apiClient.get('/trainer-schedule/available', {  // Endpoint corregido
+    params: { day, startTime, endTime },
+  });
+  console.log("ACA LA RESPONSE", response);
   return response.data;
 };

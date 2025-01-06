@@ -3,21 +3,25 @@ import { Link } from 'react-router-dom';
 import { Box } from '@mui/material';
 
 interface PaginatorProps {
-  url: string; // Prefijo de la URL base
+  url: string; // URL base, p.ej. "/store"
   paginator: {
     number: number;
     totalPages: number;
     first: boolean;
     last: boolean;
   };
+  sortBy: string; // <-- nueva prop
 }
 
-export const Paginator = ({ url, paginator }: PaginatorProps) => {
-
-  if (paginator.totalPages <= 1) return null;
+export const Paginator = ({ url, paginator, sortBy }: PaginatorProps) => {
+  console.log("PAGINATOR",url, paginator, sortBy);
 
   const { number, totalPages, first, last } = paginator;
-  console.log("datos de paginacion",number, totalPages, first, last);
+
+  console.log("PAGINATOR",number, totalPages, first, last);
+
+  if (totalPages <= 1) return null;
+
   return (
     <Box
       component="nav"
@@ -34,30 +38,42 @@ export const Paginator = ({ url, paginator }: PaginatorProps) => {
       }}
     >
       <ul className="pagination" style={{ display: 'flex', listStyle: 'none', padding: 0 }}>
+        
+        {/* Botón Anterior */}
         {!first && (
-          <li className="page-item">
-            <Link className="page-link" to={`${url}?page=${Math.max(0, number - 1)}`}>
+          <li className="page-item" style={{ margin: '0 5px' }}>
+            <Link
+              className="page-link"
+              to={`${url}/page/${Math.max(0, number - 1)}?sortBy=${sortBy}`}
+            >
               Anterior
             </Link>
           </li>
         )}
 
-        {Array.from(Array(totalPages).keys()).map((page) => (
+        {/* Números de página */}
+        {Array.from(Array(totalPages).keys()).map((pageIndex) => (
           <li
-            key={page}
-            className={`page-item ${number === page ? 'active' : ''}`}
+            key={pageIndex}
+            className={`page-item ${number === pageIndex ? 'active' : ''}`}
             style={{ margin: '0 5px' }}
           >
-<Link className="page-link" to={`${url}/page/${page}`}>
-  {page + 1}
-</Link>
-
+            <Link
+              className="page-link"
+              to={`${url}/page/${pageIndex}?sortBy=${sortBy}`}>
+        
+              {pageIndex + 1}
+            </Link>
           </li>
         ))}
 
+        {/* Botón Siguiente */}
         {!last && (
-          <li className="page-item">
-            <Link className="page-link" to={`${url}?page=${number + 1}`}>
+          <li className="page-item" style={{ margin: '0 5px' }}>
+            <Link
+              className="page-link"
+              to={`${url}/page/${number + 1}?sortBy=${sortBy}`}
+            >
               Siguiente
             </Link>
           </li>

@@ -1,38 +1,107 @@
-// src/Admin/pages/GroupClassesCreatePage.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { TextField, Button, Box, Typography, Container } from '@mui/material';
+import { TextField, Button, Box, Typography, Container, MenuItem, FormControl, InputLabel, Select, CircularProgress, Alert } from '@mui/material';
+import { DatePicker, TimePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { format } from 'date-fns';
+import Swal from 'sweetalert2';
 import { useGroupClasses } from '../../Admin/hooks/useGroupClasses';
-
-const validationSchema = Yup.object({
-  className: Yup.string().required('El nombre de la clase es requerido'),
-  startTime: Yup.string().required('La fecha/hora de inicio es requerida'),
-  endTime: Yup.string().required('La fecha/hora de fin es requerida'),
-  maxParticipants: Yup.number().required('El número máximo de participantes es requerido').min(1, 'Debe ser mayor a 0'),
-});
+import { fetchAvailableTrainers } from '../../Admin/services/AvailabilityRequest';
 
 export const GroupClassesCreatePage: React.FC = () => {
   const { handleCreateClass, loading, error } = useGroupClasses();
+  const [availableTrainers, setAvailableTrainers] = useState([]);
+  const [loadingTrainers, setLoadingTrainers] = useState(false);
+  const [fetchError, setFetchError] = useState('');
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<boolean>(false);
+
+ 
+  const validationSchema = Yup.object({
+    className: Yup.string().required('El nombre de la clase es requerido'),
+    day: Yup.date().required('Selecciona un día'),
+    startTime: Yup.date().required('Selecciona la hora de inicio'),
+    endTime: Yup.date()
+      .required('Selecciona la hora de fin')
+      .test('is-after-start', 'La hora de fin debe ser después de la hora de inicio', function (value) {
+        const { startTime } = this.parent;
+        return value && startTime && value > startTime;
+      }),
+    maxParticipants: Yup.number()
+      .required('El número máximo de participantes es requerido')
+      .min(1, 'Debe ser mayor a 0'),
+    trainerId: Yup.number().required('Selecciona un entrenador'),
+  });
 
   const formik = useFormik({
     initialValues: {
       className: '',
-      startTime: '',
-      endTime: '',
+      day: null as Date | null,
+      startTime: null as Date | null,
+      endTime: null as Date | null,
       maxParticipants: 20,
+      trainerId: '',
     },
-    validationSchema: validationSchema,
+    validationSchema,
     onSubmit: async (values) => {
+      setSubmitError(null);
+      setSubmitSuccess(false);
+
       try {
-        await handleCreateClass(values);
-        alert('Clase creada con éxito');
+        const dayStr = values.day ? format(values.day, 'yyyy-MM-dd') : '';
+        const startTimeStr = values.startTime ? format(values.startTime, 'HH:mm') : '';
+        const endTimeStr = values.endTime ? format(values.endTime, 'HH:mm') : '';
+
+        const requestData = {
+          className: values.className,
+          day: dayStr,
+          startTime: startTimeStr,
+          endTime: endTimeStr,
+          maxParticipants: values.maxParticipants,
+          trainerId: values.trainerId,
+        };
+
+        await handleCreateClass(requestData);
+        Swal.fire({
+          title: 'Clase creada con éxito',
+          icon: 'success',
+          confirmButtonText: 'OK',
+        });
         formik.resetForm();
+        setSubmitSuccess(true);
       } catch (err: any) {
-        console.error('Error al crear la clase:', err);
+        setSubmitError('Error al crear la clase');
       }
     },
   });
+
+  useEffect(() => {
+    const fetchTrainers = async () => {
+      if (formik.values.day && formik.values.startTime && formik.values.endTime) {
+        setLoadingTrainers(true);
+        try {
+          const dayStr = format(formik.values.day, 'yyyy-MM-dd');
+          const startTimeStr = format(formik.values.startTime, 'HH:mm');
+          const endTimeStr = format(formik.values.endTime, 'HH:mm');
+  
+          const trainers = await fetchAvailableTrainers(dayStr, startTimeStr, endTimeStr);
+          setAvailableTrainers(trainers);
+        } catch (err) {
+          setFetchError('Error al obtener entrenadores disponibles');
+        } finally {
+          setLoadingTrainers(false);
+        }
+      }
+    };
+  
+    fetchTrainers();
+  }, [formik.values.day, formik.values.startTime, formik.values.endTime]); 
+
+
+  if (loading) {
+    return <CircularProgress />;
+  }
 
   return (
     <Container>
@@ -51,30 +120,56 @@ export const GroupClassesCreatePage: React.FC = () => {
           helperText={formik.touched.className && formik.errors.className}
           margin="normal"
         />
-        <TextField
-          fullWidth
-          label="Fecha/Hora de Inicio (ISO 8601)"
-          name="startTime"
-          placeholder="2024-12-19T08:00:00"
-          value={formik.values.startTime}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          error={formik.touched.startTime && Boolean(formik.errors.startTime)}
-          helperText={formik.touched.startTime && formik.errors.startTime}
-          margin="normal"
-        />
-        <TextField
-          fullWidth
-          label="Fecha/Hora de Fin (ISO 8601)"
-          name="endTime"
-          placeholder="2024-12-19T09:00:00"
-          value={formik.values.endTime}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          error={formik.touched.endTime && Boolean(formik.errors.endTime)}
-          helperText={formik.touched.endTime && formik.errors.endTime}
-          margin="normal"
-        />
+
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <DatePicker
+            label="Día de la Clase"
+            value={formik.values.day}
+            onChange={(newValue) => formik.setFieldValue('day', newValue)}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                fullWidth
+                margin="normal"
+                error={formik.touched.day && Boolean(formik.errors.day)}
+                helperText={formik.touched.day && formik.errors.day}
+              />
+            )}
+          />
+
+<TimePicker
+  label="Hora de Inicio"
+  value={formik.values.startTime}
+  ampm={true}  // Habilitar AM/PM
+  onChange={(newValue) => formik.setFieldValue('startTime', newValue)}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      fullWidth
+      margin="normal"
+      error={formik.touched.startTime && Boolean(formik.errors.startTime)}
+      helperText={formik.touched.startTime && formik.errors.startTime}
+    />
+  )}
+/>
+
+<TimePicker
+  label="Hora de Fin"
+  value={formik.values.endTime}
+  ampm={true}  // Habilitar AM/PM
+  onChange={(newValue) => formik.setFieldValue('endTime', newValue)}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      fullWidth
+      margin="normal"
+      error={formik.touched.endTime && Boolean(formik.errors.endTime)}
+      helperText={formik.touched.endTime && formik.errors.endTime}
+    />
+  )}
+/>
+        </LocalizationProvider>
+
         <TextField
           fullWidth
           label="Máximo de participantes"
@@ -87,9 +182,30 @@ export const GroupClassesCreatePage: React.FC = () => {
           helperText={formik.touched.maxParticipants && formik.errors.maxParticipants}
           margin="normal"
         />
-        {error && <Typography color="error">{error}</Typography>}
-        <Button type="submit" variant="contained" color="primary" disabled={loading}>
-          {loading ? 'Creando...' : 'Crear Clase'}
+
+        <FormControl fullWidth margin="normal">
+          <InputLabel id="trainer-select-label">Entrenador Disponible</InputLabel>
+          <Select
+            labelId="trainer-select-label"
+            id="trainerId"
+            name="trainerId"
+            value={formik.values.trainerId}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+          >
+            {availableTrainers.map((trainer) => (
+              <MenuItem key={trainer.id} value={trainer.id}>
+                {trainer.username}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {submitError && <Alert severity="error">{submitError}</Alert>}
+        {submitSuccess && <Alert severity="success">Clase creada con éxito</Alert>}
+
+        <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
+          Crear Clase
         </Button>
       </Box>
     </Container>

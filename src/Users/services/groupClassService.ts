@@ -1,22 +1,9 @@
 // src/api/groupClassService.ts
 
 import apiClient from '../../Apis/apiConfig';
+import { GroupClass } from '../interfaces/GroupClass';
 
-export interface GroupClass {
-  id: number;
-  className: string;
-  startTime: string; // ISO string
-  endTime: string;   // ISO string
-  maxParticipants: number;
-  assignedTrainer?: {
-    id: number;
-    user: {
-      username: string;
-      email: string;
-    };
-    specialization?: string;
-  };
-}
+
 
 export const getAvailableGroupClasses = async (): Promise<GroupClass[]> => {
   const response = await apiClient.get('/group-classes/available');

@@ -35,7 +35,7 @@ const PersonalTrainerPage = () => {
   useEffect(() => {
     const fetchTrainers = async () => {
       try {
-        const response = await apiClient.get('/trainers/available');
+        const response = await apiClient.get('/trainer-schedule/all-available');
         console.log("fetchTrainers - Datos recibidos desde el backend:", response.data);
         setTrainers(response.data);
       } catch (error) {
@@ -68,7 +68,7 @@ const PersonalTrainerPage = () => {
     }
   
     // Construimos la URL de la preferencia dependiendo del modo
-    let url = '/payment/create_preference';
+    let url = '/payment/create_plan_preference';
     if (onlyTrainer) {
       url += `?trainerId=${trainerId}&onlyTrainer=true`;
     } else {
@@ -127,13 +127,13 @@ const PersonalTrainerPage = () => {
         {trainers.map((trainer) => (
           <Grid item xs={12} sm={6} md={4} key={trainer.id}>
             <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-              <CardMedia
-                component="img"
-                height="240"
-                image={`${trainer.profileImageUrl}?random=${Math.random()}`}
-                alt={trainer.username}
-                sx={{ objectFit: 'cover' }}
-              />
+            <CardMedia
+  component="img"
+  height="240"
+  image={`${trainer.profileImageUrl}?v=${trainer.id}`}  // Aquí se usa el id del entrenador
+  alt={trainer.username}
+  sx={{ objectFit: 'cover' }}
+/>
               <CardContent sx={{ flexGrow: 1 }}>
                 <Typography variant="h6" gutterBottom>
                   {trainer.username}

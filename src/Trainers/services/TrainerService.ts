@@ -2,6 +2,7 @@
 
 import { UserInterface } from '../../Auth/Interfaces/UserInterface';
 import apiClient from '../../Apis/apiConfig';
+import axios from 'axios';
 
 // src/Trainers/services/TrainerService.ts
 
@@ -41,5 +42,38 @@ export const getClients = async () => {
     console.error('[TrainerClientService] Error fetching clients:', error);
     throw error;
   }
+};
+
+export interface ActiveClientInfo {
+  clientId: number;
+  clientName: string;
+  clientEmail: string;
+  planName?: string;
+  planStart?: string;  
+  planEnd?: string;      
+  trainerStart?: string;  
+  trainerEnd?: string;    
+}
+
+export const getActiveClientsInfo = async (): Promise<ActiveClientInfo[]> => {
+  const response = await apiClient.get('/trainers/active-clients-info');
+  return response.data;
+};
+
+export interface TrainerCalendarEvent {
+  id: number;
+  title: string;
+  start: string;  // ISO date string
+  end:   string;  // ISO date string
+  eventType: 'PERSONAL' | 'GROUP';  // o el string que tu backend devuelva
+}
+
+/**
+ * Obtiene TODOS los eventos (personales + grupales) del entrenador con ID `trainerId`.
+ */
+export const getTrainerCalendarEvents = async (trainerId: number): Promise<TrainerCalendarEvent[]> => {
+  const response = await apiClient.get(`/trainer-schedule/${trainerId}/calendar`);
+  console.log("ACA LA RESPONSE",response);
+  return response.data;
 };
 

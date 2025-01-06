@@ -57,6 +57,10 @@ export const authSlice = createSlice({
         state.isAdmin = payload.admin;
         state.trainer = payload.trainer;
         state.roles = payload.roles ? payload.roles.map(role => role.authority) : [];
+      } else {
+        // Asegura que cualquier actualización de trainer se refleje
+        state.user = payload;
+        state.trainer = payload.trainer;
       }
     },
   },

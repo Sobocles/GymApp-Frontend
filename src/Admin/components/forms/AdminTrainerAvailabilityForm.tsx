@@ -39,8 +39,7 @@ const AdminTrainerAvailabilityForm: React.FC = () => {
   useEffect(() => {
     const fetchTrainers = async () => {
       try {
-        const response = await apiClient.get('/trainers/available');
-        console.log("AQUI LOS ENTRENADORES DISPONIBLES",response);
+        const response = await apiClient.get('/trainer-schedule/all-available');
         setTrainers(response.data);
       } catch (error: any) {
         console.error('Error al obtener entrenadores disponibles:', error);
@@ -53,7 +52,7 @@ const AdminTrainerAvailabilityForm: React.FC = () => {
   }, []);
 
   const validationSchema = Yup.object({
-    trainerId: Yup.number().required('Elige un entrenador'),
+    trainerId: Yup.number().required('Selecciona un entrenador'),
     day: Yup.date().required('Selecciona un día'),
     startTime: Yup.date().required('Selecciona la hora de inicio'),
     endTime: Yup.date()
@@ -95,7 +94,6 @@ const AdminTrainerAvailabilityForm: React.FC = () => {
           `/trainer-schedule/${values.trainerId}/availability`,
           requestBody
         );
-        console.log('ACA ESTA EL ENTRENADOR QUE LLEGO DESDE AL BACKEND', response.data);
         setSubmitSuccess(true);
         formik.resetForm();
       } catch (error: any) {
@@ -143,7 +141,7 @@ const AdminTrainerAvailabilityForm: React.FC = () => {
             label="Día"
             value={formik.values.day}
             onChange={(value: Date | null) => formik.setFieldValue('day', value)}
-            renderInput={(params: any) => (
+            renderInput={(params) => (
               <TextField
                 {...params}
                 fullWidth
@@ -158,7 +156,7 @@ const AdminTrainerAvailabilityForm: React.FC = () => {
             label="Hora inicio"
             value={formik.values.startTime}
             onChange={(value: Date | null) => formik.setFieldValue('startTime', value)}
-            renderInput={(params: any) => (
+            renderInput={(params) => (
               <TextField
                 {...params}
                 fullWidth
@@ -173,7 +171,7 @@ const AdminTrainerAvailabilityForm: React.FC = () => {
             label="Hora fin"
             value={formik.values.endTime}
             onChange={(value: Date | null) => formik.setFieldValue('endTime', value)}
-            renderInput={(params: any) => (
+            renderInput={(params) => (
               <TextField
                 {...params}
                 fullWidth
@@ -185,8 +183,10 @@ const AdminTrainerAvailabilityForm: React.FC = () => {
           />
         </LocalizationProvider>
 
-        {submitError && <Alert severity="error" sx={{ mt: 2 }}>{submitError}</Alert>}
-        {submitSuccess && <Alert severity="success" sx={{ mt: 2 }}>Disponibilidad creada con éxito</Alert>}
+        {submitError && <Alert severity="error">{submitError}</Alert>}
+        {submitSuccess && (
+          <Alert severity="success">Disponibilidad creada con éxito</Alert>
+        )}
 
         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
           <Button variant="contained" color="primary" type="submit">

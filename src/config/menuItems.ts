@@ -28,12 +28,26 @@ export interface MenuItem {
 
 
 export const menuItems: MenuItem[] = [
+
   {
-    label: 'Dashboard',
+    label: 'Dashboard Admin',
+    path: '/admin/dashboard',
+    icon: DashboardIcon,
+    roles: ['ROLE_ADMIN']
+  },
+  {
+    label: 'Dashboard User',
     path: '/dashboard',
     icon: DashboardIcon,
-    roles: ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TRAINER'],
+    roles: ['ROLE_USER'],
   },
+  {
+    label: 'Sesiones Personal Trainer',
+    path: '/dashboard/trainer-sessions',
+    icon: CalendarTodayIcon,
+    roles: ['ROLE_USER'],
+  },
+  
   {
     label: 'Usuarios',
     path: '/admin/users',
@@ -41,9 +55,9 @@ export const menuItems: MenuItem[] = [
     roles: ['ROLE_ADMIN'],
   },
   {
-    label: 'Entrenadores',
+    label: 'Dashboard Trainer',
     path: '/trainers',
-    icon: AssignmentIndIcon,
+    icon: DashboardIcon,
     roles: ['ROLE_TRAINER'],
   },
   {
@@ -56,8 +70,21 @@ export const menuItems: MenuItem[] = [
     label: 'Editar Perfil',
     path: '/trainers/edit-profile',
     icon: AccountCircleIcon,
-    roles: ['ROLE_TRAINER'],
+    roles: ['ROLE_TRAINER','ROLE_USER'],
   },
+  {
+    label: 'Gestión de Productos',
+    path: '/admin/store/products',
+    icon: ShoppingCartIcon,
+    roles: ['ROLE_ADMIN'],
+  },
+  {
+    label: 'Gestión de Categorías',
+    path: '/admin/store/categories',
+    icon: ShoppingCartIcon,
+    roles: ['ROLE_ADMIN'],
+  },
+
   {
     label: 'Calendario',
     path: '/dashboard/calendar',
@@ -84,9 +111,9 @@ export const menuItems: MenuItem[] = [
   },
   {
     label: 'Mediciones',
-    path: '/users/measurements', // Ruta que crearemos
+    path: '/users/measurements', 
     icon: MeasurementsIcon,
-    roles: ['ROLE_USER', 'ROLE_TRAINER', 'ROLE_ADMIN'],
+    roles: ['ROLE_USER'],
   },
   {
     label: 'Clases Grupales',
@@ -104,31 +131,34 @@ export const menuItems: MenuItem[] = [
     label: 'Clases Disponibles',
     path: '/users/group-classes/available',
     icon: FitnessCenterIcon,
-    roles: ['ROLE_USER', 'ROLE_TRAINER', 'ROLE_ADMIN'],
+    roles: ['ROLE_USER'],
   },
+
   {
-    label: 'Dashboard Admin',
-    path: '/admin/dashboard',
-    icon: DashboardIcon,
-    roles: ['ROLE_ADMIN']
+    label: 'Mi Calendario (Trainer)',
+    path: '/trainers/my-calendar',
+    icon: CalendarTodayIcon,
+    roles: ['ROLE_TRAINER'],
   },
+  
+  
   {
     label: 'Tienda',
-    path: '/store',  // Puede ser solo "/store" o vacío si usarás submenú.
-    icon: ShoppingCartIcon, // Un icono relacionado a la tienda
-    roles: ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TRAINER'], // o los roles que desees
+    path: '/store',
+    icon: ShoppingCartIcon,
+    roles: ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TRAINER'],
     subItems: [
       {
         label: 'Proteína',
         path: '/store/proteina',
-        roles: ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TRAINER']
+        roles: ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TRAINER'],
       },
       {
         label: 'Creatina',
         path: '/store/creatina',
-        roles: ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TRAINER']
-      }
-    ]
-  }
+        roles: ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TRAINER'],
+      },
+    ],
+  },
   
 ];

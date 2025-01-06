@@ -11,9 +11,8 @@ import {
   Modal,
   TextField,
 } from '@mui/material';
-import { getCarouselImages, uploadCarouselImage } from '../../services';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
+import { getCarouselImages, uploadCarouselImage, updateCarouselImage, deleteCarouselImage } from '../../Admin/services/carouselService';
+
 
 const CarouselAdminPage: React.FC = () => {
   const [images, setImages] = useState<any[]>([]);
@@ -21,7 +20,8 @@ const CarouselAdminPage: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [caption, setCaption] = useState('');
   const [orderNumber, setOrderNumber] = useState<number>(0);
-  const { token } = useSelector((state: RootState) => state.auth);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
 
   useEffect(() => {
     fetchImages();
@@ -30,14 +30,23 @@ const CarouselAdminPage: React.FC = () => {
   const fetchImages = async () => {
     try {
       const data = await getCarouselImages();
-      console.log('Datos recibidos del backend:', data);
+      console.log("ACA LA DATA DEL CARROUSEL",data);
       setImages(data);
     } catch (error) {
       console.error('Error al obtener imágenes:', error);
     }
   };
 
-  const handleOpenModal = () => {
+  const handleOpenModal = (image?: any) => {
+    if (image) {
+      setEditingId(image.id);
+      setCaption(image.caption);
+      setOrderNumber(image.orderNumber);
+    } else {
+      setEditingId(null);
+      setCaption('');
+      setOrderNumber(0);
+    }
     setOpenModal(true);
   };
 
@@ -46,6 +55,7 @@ const CarouselAdminPage: React.FC = () => {
     setSelectedFile(null);
     setCaption('');
     setOrderNumber(0);
+    setEditingId(null);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,20 +67,53 @@ const CarouselAdminPage: React.FC = () => {
   const handleUpload = async () => {
     if (!selectedFile) return;
     try {
-      await uploadCarouselImage(selectedFile, caption, orderNumber, token);
+      await uploadCarouselImage(selectedFile, caption, orderNumber);
       fetchImages();
       handleCloseModal();
     } catch (error) {
       console.error('Error al subir imagen:', error);
     }
   };
+  
+
+
+  const handleUpdate = async () => {
+    if (editingId === null) return;
+    try {
+      const formData = new FormData();
+      formData.append('caption', caption);
+      formData.append('order', orderNumber.toString());
+  
+      // Si hay una nueva imagen seleccionada, agregarla al formData
+      if (selectedFile) {
+        formData.append('file', selectedFile);
+      }
+  
+      await updateCarouselImage(editingId, caption, orderNumber);
+      fetchImages();
+      handleCloseModal();
+    } catch (error) {
+      console.error('Error al actualizar imagen:', error);
+    }
+  };
+  
+  
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteCarouselImage(id);
+      fetchImages();
+    } catch (error) {
+      console.error('Error al eliminar imagen:', error);
+    }
+  };
+  
 
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
         Administrador de Carrusel
       </Typography>
-      <Button variant="contained" color="primary" onClick={handleOpenModal}>
+      <Button variant="contained" color="primary" onClick={() => handleOpenModal()}>
         Agregar Nueva Imagen
       </Button>
       <Grid container spacing={2} sx={{ mt: 2 }}>
@@ -90,61 +133,69 @@ const CarouselAdminPage: React.FC = () => {
                 </Typography>
               </CardContent>
               <CardActions>
-                {/* Aquí puedes agregar botones para editar o eliminar */}
+                <Button size="small" color="secondary" onClick={() => handleOpenModal(image)}>
+                  Editar
+                </Button>
+                <Button size="small" color="error" onClick={() => handleDelete(image.id)}>
+                  Eliminar
+                </Button>
               </CardActions>
             </Card>
           </Grid>
         ))}
       </Grid>
 
-      {/* Modal para agregar nueva imagen */}
+      {/* Modal para agregar o editar imagen */}
       <Modal open={openModal} onClose={handleCloseModal}>
-        <Box
-          sx={{
-            position: 'absolute' as const,
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 400,
-            bgcolor: 'background.paper',
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
-            Subir Nueva Imagen
-          </Typography>
-          <TextField
-            fullWidth
-            label="Título"
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Orden"
-            type="number"
-            value={orderNumber}
-            onChange={(e) => setOrderNumber(Number(e.target.value))}
-            sx={{ mb: 2 }}
-          />
-          <Button variant="contained" component="label" fullWidth>
-            Seleccionar Imagen
-            <input type="file" hidden onChange={handleFileChange} />
-          </Button>
-          {selectedFile && <Typography sx={{ mt: 1 }}>{selectedFile.name}</Typography>}
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleUpload}
-            sx={{ mt: 2 }}
-            disabled={!selectedFile}
-          >
-            Subir
-          </Button>
-        </Box>
-      </Modal>
+  <Box
+    sx={{
+      position: 'absolute' as const,
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: 400,
+      bgcolor: 'background.paper',
+      boxShadow: 24,
+      p: 4,
+    }}
+  >
+    <Typography variant="h6" gutterBottom>
+      {editingId ? 'Editar Imagen' : 'Subir Nueva Imagen'}
+    </Typography>
+    <TextField
+      fullWidth
+      label="Título"
+      value={caption ?? ''}
+      onChange={(e) => setCaption(e.target.value)}
+      sx={{ mb: 2 }}
+    />
+    <TextField
+      fullWidth
+      label="Orden"
+      type="number"
+      value={orderNumber ?? 0}
+      onChange={(e) => setOrderNumber(Number(e.target.value))}
+      sx={{ mb: 2 }}
+    />
+
+    <Button variant="contained" component="label" fullWidth>
+      {selectedFile ? 'Cambiar Imagen' : 'Seleccionar Imagen'}
+      <input type="file" hidden onChange={handleFileChange} />
+    </Button>
+    {selectedFile && <Typography sx={{ mt: 1 }}>{selectedFile.name}</Typography>}
+
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={editingId ? handleUpdate : handleUpload}
+      sx={{ mt: 2 }}
+      disabled={!selectedFile && !editingId}
+    >
+      {editingId ? 'Actualizar' : 'Subir'}
+    </Button>
+  </Box>
+</Modal>
+
     </Box>
   );
 };

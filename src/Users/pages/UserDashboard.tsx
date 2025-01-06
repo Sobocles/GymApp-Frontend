@@ -66,6 +66,7 @@ export const UserDashboard: React.FC = () => {
           },
         };
         const response = await apiClient.get('/users/dashboard', config);
+        console.log("aqui la response",response);
         setData(response.data);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);

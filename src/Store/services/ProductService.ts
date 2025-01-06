@@ -39,17 +39,21 @@ interface ProductPage {
   };
 
   export const getProductsPage = async (
-    page = 0, 
-    size = 12, 
-    category?: string
+    page: number,
+    size: number,
+    category?: string,
+    sortBy?: string
   ): Promise<ProductPage> => {
-    const params: any = { size };
+    // Parametrizamos la llamada
+    const params: any = {};
     if (category) params.category = category;
+    if (sortBy) params.sortBy = sortBy;
+    params.size = size;
   
     const response = await apiClient.get(`/store/products/page/${page}`, { params });
-    console.log("ACA LOS DATOS DE PAGINACION BACKEND",response.data);
-    return response.data; // as ProductPage
+    return response.data;  
   };
+  
 
   // ProductService.ts (frontend)
 export const getProductsBySearch = async (term: string): Promise<Product[]> => {
@@ -69,5 +73,8 @@ export const createProductPreference = async (items: CartItem[]) => {
     
 
 };
+
+
+
 
 

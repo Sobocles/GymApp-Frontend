@@ -42,17 +42,24 @@ const Carousel = () => {
       slidesPerView={1}
       pagination={{ clickable: true }}
       navigation
-      autoplay={{ delay: 3000 }}
+      autoplay={{ delay: 6000 }}
     >
       {images.length > 0 ? (
-        images.map((image) => (
-          <SwiperSlide key={image.id}>
-            <img className="carousel-image" src={image.imageUrl} alt={image.caption} />
-          </SwiperSlide>
-        ))
+  images.map((image) => (
+    <SwiperSlide key={image.id}>
+      {!image.imageUrl ? (
+        <div style={{ width: '100%', height: '200px', backgroundColor: '#ccc' }}>
+          {/* Placeholder */}
+        </div>
       ) : (
-        <p>No hay imágenes disponibles.</p>
+        <img className="carousel-image" src={image.imageUrl} alt={image.caption} />
       )}
+    </SwiperSlide>
+  ))
+) : (
+  <p>No hay imágenes disponibles.</p>
+)}
+
     </Swiper>
   );
 };

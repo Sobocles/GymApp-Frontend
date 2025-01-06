@@ -4,12 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { loginUser } from '../services/authService';
 import { useDispatch, useSelector } from 'react-redux';
-import { onLogin, onLogout } from '../store/auth/authSlice';
+import { onLogin, onLogout, updateProfile } from '../store/auth/authSlice';
 
 import { RootState } from '../../store';
 import { AxiosError } from 'axios';
 import { UserInterface } from '../Interfaces/UserInterface';
-
+import apiClient from '../../Apis/apiConfig';
 export const useAuth = () => {
   const dispatch = useDispatch();
   const { user, isAdmin, trainer, isAuth, roles, token } = useSelector(
@@ -60,7 +60,7 @@ export const useAuth = () => {
           }).filter(role => role); // Filtrar strings vacíos
         }
       }
-
+      console.log("HOLAAAAAAAAAAAAAAA");
       const user: UserInterface = {
         id: claims.id || '', // ID si está disponible
         username: claims.username || '', // Asignar correctamente el nombre de usuario
@@ -70,11 +70,40 @@ export const useAuth = () => {
         roles: rolesArray.map(role => ({ authority: role })),
         profileImageUrl: claims.profileImageUrl || '',
       };
+      
+      if (user.trainer) {
+        console.log("AQUI EDELGARD entro al if user.trainer ",user);
+        try {
+          const trainerResponse = await apiClient.get(`/trainers/findByUserId/${user.id}`);
+          console.log("aca deberia cambiarle el id",trainerResponse);
+          const trainerData = trainerResponse.data;
+          console.log("Trainer encontrado:", trainerData);
+      
+          // Reemplazar el id de usuario con el id del entrenador
+          user.id = trainerData.id;
+      
+          // ACTUALIZA EL TRAINER ID EN REDUX
+          dispatch(updateProfile({
+            ...user,
+            id: trainerData.id  // Reemplazamos el id con el del trainer
+          }));
+        } catch (error) {
+          console.error("Error obteniendo trainerId:", error);
+        }
+      }
+      
 
       console.log('AQUI ESTA EL USER:', user);
 
-      dispatch(onLogin({ user, roles: rolesArray, isAdmin: user.admin, trainer: user.trainer, token }));
-
+      dispatch(onLogin({
+        user,
+        roles: rolesArray,
+        isAdmin: user.admin,
+        trainer: user.trainer,
+        token
+      }));
+  
+      // Guardar en sessionStorage
       sessionStorage.setItem('login', JSON.stringify({
         isAuth: true,
         isAdmin: user.admin,
@@ -83,6 +112,7 @@ export const useAuth = () => {
         roles: rolesArray,
       }));
       sessionStorage.setItem('token', `${token}`);
+  
 
       // Redirigir al usuario según 'from' o su rol
       if (from) {
