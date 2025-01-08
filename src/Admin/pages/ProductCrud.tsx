@@ -60,6 +60,7 @@ export const ProductCrud: React.FC = () => {
   const fetchProducts = async () => {
     try {
       const response = await apiClient.get<Product[]>('/store/products');
+      console.log("AQUI LOS PRODUCTS", response);
       setProducts(response.data);
     } catch (error) {
       console.error('Error al obtener productos:', error);
@@ -193,10 +194,11 @@ export const ProductCrud: React.FC = () => {
                   <TableCell>{p.description}</TableCell>
                   {/* Ajusta según cómo venga la categoría desde backend */}
                   <TableCell>
-                    {typeof p.category === 'string'
-                      ? p.category
-                      : 'Sin categoría'}
-                  </TableCell>
+  {p.category && typeof p.category === 'object'
+    ? p.category.name
+    : 'Sin categoría'}
+</TableCell>
+
                   <TableCell>{p.price}</TableCell>
                   <TableCell>
                     {p.imageUrl ? (

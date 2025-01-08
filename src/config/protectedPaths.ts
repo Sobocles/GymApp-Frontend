@@ -1,5 +1,3 @@
-
-// src/config/protectedPaths.ts
 export const PROTECTED_PATHS = [
   '/dashboard',
   '/admin/dashboard',
@@ -11,7 +9,8 @@ export const PROTECTED_PATHS = [
   '/trainers/clients',
   '/users/measurements',
   '/admin/group-classes',
-  '/admin/store', // Añade la ruta del módulo de tienda
+  '/store/cart',
+  '/auth/login',  // Agrega login explícitamente como protegido
+    '/admin/store/products',  // Añadimos las rutas aquí
+  '/admin/store/categories'
 ];
-
-  

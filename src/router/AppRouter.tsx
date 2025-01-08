@@ -87,15 +87,15 @@ export const AppRouter = () => {
           element={isAuth ? <DashboardAdmin /> : <Navigate to="/auth/login" />}
         />
 
-<Route
-  path="dashboard/trainer-sessions"
-  element={isAuth ? <TrainerSessionsCalendar /> : <Navigate to="/auth/login" />}
-/>
+      <Route
+        path="dashboard/trainer-sessions"
+        element={isAuth ? <TrainerSessionsCalendar /> : <Navigate to="/auth/login" />}
+      />
 
-        <Route
-  path="trainers/my-calendar"
-  element={ isAuth ? <TrainerCalendarPage /> : <Navigate to="/auth/login" /> }
-/>
+              <Route
+        path="trainers/my-calendar"
+        element={ isAuth ? <TrainerCalendarPage /> : <Navigate to="/auth/login" /> }
+      />
 
         {/* Admin Users */}
         <Route

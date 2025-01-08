@@ -12,6 +12,21 @@ interface ProductPage {
   last: boolean;
   // ... otros campos que Page<Product> devuelva
 }
+  interface AdvancedSearchPayload {
+    page: number;
+    size: number;
+    sortBy: string;
+  
+    // Filtros
+    category?: string|null;
+    inStock?: boolean;
+    brands?: string[];
+    flavors?: string[];
+    minPrice?: number;
+    maxPrice?: number;
+    // ...
+  }
+
   
   export const getAllProducts = async (): Promise<Product[]> => {
       console.log("AQUI LLEGA");
@@ -51,6 +66,7 @@ interface ProductPage {
     params.size = size;
   
     const response = await apiClient.get(`/store/products/page/${page}`, { params });
+    console.log("response",response);
     return response.data;  
   };
   
@@ -60,6 +76,7 @@ export const getProductsBySearch = async (term: string): Promise<Product[]> => {
   const response = await apiClient.get('/store/products/search', {
     params: { term },
   });
+  console.log("response",response);
   return response.data; // un array de Product
 };
 
@@ -73,6 +90,50 @@ export const createProductPreference = async (items: CartItem[]) => {
     
 
 };
+
+export const getDistinctBrands = async (): Promise<string[]> => {
+  const response = await apiClient.get('/store/products/brands');
+  return response.data;
+};
+
+export const getDistinctFlavors = async (): Promise<string[]> => {
+  const response = await apiClient.get('/store/products/flavors');
+  return response.data;
+};
+
+
+export async function advancedSearchProducts(
+  payload: AdvancedSearchPayload
+): Promise<ProductPage> {
+  const {
+    page,
+    size,
+    sortBy,
+    category,
+    inStock,
+    brands,
+    flavors,
+    minPrice,
+    maxPrice,
+  } = payload;
+
+  const params: any = {
+    page,
+    size,
+    sortBy,
+    minPrice,
+    maxPrice,
+  };
+  if (category) params.category = category;
+  if (inStock !== undefined) params.inStock = inStock;
+  if (brands && brands.length > 0) params.brands = brands.join(',');
+  if (flavors && flavors.length > 0) params.flavors = flavors.join(',');
+
+  const response = await apiClient.get('/store/products/search2', { params });
+  console.log("search2 response", response);
+  return response.data;
+}
+
 
 
 

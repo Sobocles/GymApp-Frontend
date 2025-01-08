@@ -1,0 +1,56 @@
+.homepage-container {
+    text-align: center;
+    background-color: #1976d2;
+    color: white;
+    padding: 50px 0;
+    margin: 0;  /* Eliminar márgenes */
+    width: 100%;
+    box-sizing: border-box; /* Evita que el padding aumente el ancho */
+  }
+  
+  .features-container {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+  }
+  
+  .feature-item {
+    text-align: center;
+    width: 150px;
+  }
+  
+  .feature-item img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 4px solid white;
+  }
+  
+  .promo-section {
+    text-align: center;
+    margin: 50px 0;
+    width: 100%;
+  }
+  
+  .promo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: 0;
+  }
+  
+  .promo-item {
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+  }
+  
+  .promo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
