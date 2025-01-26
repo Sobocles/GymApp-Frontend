@@ -1,11 +1,12 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate, useLocation } from 'react-router-dom';  // Importar useNavigate y useLocation
+import { useNavigate, useLocation } from 'react-router-dom';
 import { RootState } from '../../store';
-import { 
-  removeFromCart, 
-  increaseQuantity, 
-  decreaseQuantity 
+import {
+  removeFromCart,
+  increaseQuantity,
+  decreaseQuantity,
+  CartItem
 } from '../Store/slices/cartSlice';
 import { Box, Typography, IconButton, Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -13,16 +14,50 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { createProductPreference } from '../services/ProductService';
 
+/**
+ * Duplicamos la misma lógica de getDiscountedPrice para cada producto
+ * y poder mostrar su precio final y original en caso de descuento.
+ */
+function getDiscountedPrice(item: CartItem) {
+  const { product } = item;
+  const now = new Date();
+  
+  const start = product.discountStart ? new Date(product.discountStart) : null;
+  const end = product.discountEnd ? new Date(product.discountEnd) : null;
+
+  let isDiscountActive = false;
+  if (
+    product.discountPercent &&
+    product.discountPercent > 0 &&
+    start && end &&
+    now >= start &&
+    now <= end
+  ) {
+    isDiscountActive = true;
+  }
+
+  const originalPrice = product.price;
+  let finalPrice = product.price;
+  
+  if (isDiscountActive) {
+    finalPrice = finalPrice - (finalPrice * product.discountPercent / 100);
+  }
+
+  return {
+    originalPrice,
+    finalPrice,
+    isDiscountActive,
+    discountReason: isDiscountActive ? product.discountReason : null
+  };
+}
+
 const CartPage: React.FC = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();  // Hook para navegación
-  const location = useLocation();  // Hook para obtener la ruta actual
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const { items } = useSelector((state: RootState) => state.cart);
-  const { isAuth, token } = useSelector((state: RootState) => state.auth);  // Estado de autenticación
-
-  // Calcular total
-  const totalPrice = items.reduce((total, item) => total + item.product.price * item.quantity, 0);
+  const { isAuth } = useSelector((state: RootState) => state.auth);
 
   if (items.length === 0) {
     return (
@@ -32,31 +67,41 @@ const CartPage: React.FC = () => {
     );
   }
 
+  // Calculamos el total (sumamos finalPrice * quantity)
+  const totalPrice = items.reduce((acc, item) => {
+    const { finalPrice } = getDiscountedPrice(item);
+    return acc + finalPrice * item.quantity;
+  }, 0);
+
   const handleCheckout = async () => {
-    // Verificar autenticación antes de proceder
+    // Verificar autenticación
     if (!isAuth) {
       navigate('/auth/login', { state: { from: location.pathname } });
       return;
     }
-  
-    const payload = items.map(item => ({
-      unitPrice: item.product.price,
-      quantity: item.quantity,
-    }));
-  
+
+    // Armar payload usando el precio con descuento en cada ítem
+    const payload = items.map(item => {
+      const { finalPrice } = getDiscountedPrice(item);
+      return {
+        productId: item.product.id,
+        unitPrice: finalPrice,   // <--- Importante: mandar precio final
+        quantity: item.quantity,
+      };
+    });
+
     try {
       const response = await createProductPreference(payload);
       const { initPoint } = response;
-  
+
       if (initPoint) {
-        window.location.href = initPoint;  // Redirige al checkout de MercadoPago
+        window.location.href = initPoint;  
       }
     } catch (error) {
       console.error('Error al procesar el checkout:', error);
       alert('Error durante el proceso de compra.');
     }
   };
-  
 
   return (
     <Box sx={{ p: 2 }}>
@@ -64,64 +109,97 @@ const CartPage: React.FC = () => {
         Carrito de Compras
       </Typography>
 
-      {items.map((item) => (
-        <Box
-        key={item.product.id}
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ borderBottom: '1px solid #ccc', py: 1 }}
-      >
-        <Box display="flex" alignItems="center">
-          <img
-            src={item.product.imageUrl}
-            alt={item.product.name}
-            style={{
-              width: '80px',
-              height: '80px',
-              objectFit: 'cover',
-              marginRight: '16px',
-              borderRadius: '8px',
-            }}
-          />
-          <Box>
-            <Typography variant="h6">{item.product.name}</Typography>
-            <Typography variant="body2">
-              Precio: ${item.product.price.toFixed(2)}
-            </Typography>
+      {items.map(item => {
+        // Calculamos su descuento
+        const { originalPrice, finalPrice, isDiscountActive, discountReason } = getDiscountedPrice(item);
+
+        return (
+          <Box
+            key={item.product.id}
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{ borderBottom: '1px solid #ccc', py: 1 }}
+          >
+            <Box display="flex" alignItems="center">
+              <img
+                src={item.product.imageUrl}
+                alt={item.product.name}
+                style={{
+                  width: '80px',
+                  height: '80px',
+                  objectFit: 'cover',
+                  marginRight: '16px',
+                  borderRadius: '8px',
+                }}
+              />
+              <Box>
+                <Typography variant="h6">{item.product.name}</Typography>
+                
+                {isDiscountActive ? (
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      sx={{ textDecoration: 'line-through', color: 'gray' }}
+                    >
+                      ${originalPrice.toFixed(2)}
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{ color: 'red', fontWeight: 'bold' }}
+                    >
+                      ${finalPrice.toFixed(2)} (x {item.quantity})
+                    </Typography>
+                    {discountReason && (
+                      <Typography
+                        variant="body2"
+                        sx={{ color: 'red', fontStyle: 'italic' }}
+                      >
+                        {discountReason}
+                      </Typography>
+                    )}
+                  </Box>
+                ) : (
+                  <Typography variant="body2">
+                    ${originalPrice.toFixed(2)} (x {item.quantity})
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+
+            {/* Botones + y - */}
+            <Box display="flex" alignItems="center">
+              <IconButton
+                color="primary"
+                onClick={() => dispatch(decreaseQuantity(item.product.id))}
+              >
+                <RemoveIcon />
+              </IconButton>
+              <Typography sx={{ mx: 1 }}>{item.quantity}</Typography>
+              <IconButton
+                color="primary"
+                onClick={() => dispatch(increaseQuantity(item.product.id))}
+              >
+                <AddIcon />
+              </IconButton>
+              <IconButton
+                color="error"
+                onClick={() => dispatch(removeFromCart(item.product.id))}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
           </Box>
-        </Box>
-        <Box display="flex" alignItems="center">
-          <IconButton 
-            color="primary" 
-            onClick={() => dispatch(decreaseQuantity(item.product.id))}
-          >
-            <RemoveIcon />
-          </IconButton>
-          <Typography sx={{ mx: 1 }}>{item.quantity}</Typography>
-          <IconButton 
-            color="primary" 
-            onClick={() => dispatch(increaseQuantity(item.product.id))}
-          >
-            <AddIcon />
-          </IconButton>
-          <IconButton 
-            color="error" 
-            onClick={() => dispatch(removeFromCart(item.product.id))}
-          >
-            <DeleteIcon />
-          </IconButton>
-        </Box>
-      </Box>
-      ))}
+        );
+      })}
 
       <Box mt={2}>
         <Typography variant="h6">
           Total: ${totalPrice.toFixed(2)}
         </Typography>
-        <Button 
-          variant="contained" 
-          color="primary" 
+        <Button
+          variant="contained"
+          color="primary"
           sx={{ mt: 2 }}
           onClick={handleCheckout}
         >

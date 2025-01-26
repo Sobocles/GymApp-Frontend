@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import Swal from 'sweetalert2'; // Importación de SweetAlert2
 import apiClient from '../../../Apis/apiConfig';
 import {
   Box,
@@ -9,7 +10,6 @@ import {
   MenuItem,
   Typography,
   CircularProgress,
-  Alert,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
@@ -32,9 +32,6 @@ interface TrainerAvailabilityRequest {
 const AdminTrainerAvailabilityForm: React.FC = () => {
   const [trainers, setTrainers] = useState<PersonalTrainerDto[]>([]);
   const [loadingTrainers, setLoadingTrainers] = useState(true);
-  const [errorTrainers, setErrorTrainers] = useState<string | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchTrainers = async () => {
@@ -42,8 +39,7 @@ const AdminTrainerAvailabilityForm: React.FC = () => {
         const response = await apiClient.get('/trainer-schedule/all-available');
         setTrainers(response.data);
       } catch (error: any) {
-        console.error('Error al obtener entrenadores disponibles:', error);
-        setErrorTrainers('Error al cargar entrenadores disponibles');
+        Swal.fire('Error', 'Error al cargar entrenadores disponibles', 'error');
       } finally {
         setLoadingTrainers(false);
       }
@@ -76,13 +72,14 @@ const AdminTrainerAvailabilityForm: React.FC = () => {
     },
     validationSchema,
     onSubmit: async (values) => {
-      setSubmitError(null);
-      setSubmitSuccess(false);
-
       try {
         const dayStr = values.day ? format(values.day, 'yyyy-MM-dd') : '';
-        const startTimeStr = values.startTime ? format(values.startTime, 'HH:mm') : '';
-        const endTimeStr = values.endTime ? format(values.endTime, 'HH:mm') : '';
+        const startTimeStr = values.startTime
+          ? format(values.startTime, 'HH:mm')
+          : '';
+        const endTimeStr = values.endTime
+          ? format(values.endTime, 'HH:mm')
+          : '';
 
         const requestBody: TrainerAvailabilityRequest = {
           day: dayStr,
@@ -90,25 +87,29 @@ const AdminTrainerAvailabilityForm: React.FC = () => {
           endTime: endTimeStr,
         };
 
-        const response = await apiClient.post(
+        await apiClient.post(
           `/trainer-schedule/${values.trainerId}/availability`,
           requestBody
         );
-        setSubmitSuccess(true);
+
+        Swal.fire(
+          'Éxito',
+          'Disponibilidad creada con éxito',
+          'success'
+        );
         formik.resetForm();
       } catch (error: any) {
-        console.error('Error al crear la disponibilidad:', error);
-        setSubmitError(error.response?.data || 'Error al crear la disponibilidad');
+        Swal.fire(
+          'Error',
+          error.response?.data || 'Error al crear la disponibilidad',
+          'error'
+        );
       }
     },
   });
 
   if (loadingTrainers) {
     return <CircularProgress />;
-  }
-
-  if (errorTrainers) {
-    return <Alert severity="error">{errorTrainers}</Alert>;
   }
 
   return (
@@ -140,7 +141,9 @@ const AdminTrainerAvailabilityForm: React.FC = () => {
           <DatePicker
             label="Día"
             value={formik.values.day}
-            onChange={(value: Date | null) => formik.setFieldValue('day', value)}
+            onChange={(value: Date | null) =>
+              formik.setFieldValue('day', value)
+            }
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -155,13 +158,17 @@ const AdminTrainerAvailabilityForm: React.FC = () => {
           <TimePicker
             label="Hora inicio"
             value={formik.values.startTime}
-            onChange={(value: Date | null) => formik.setFieldValue('startTime', value)}
+            onChange={(value: Date | null) =>
+              formik.setFieldValue('startTime', value)
+            }
             renderInput={(params) => (
               <TextField
                 {...params}
                 fullWidth
                 margin="normal"
-                error={formik.touched.startTime && Boolean(formik.errors.startTime)}
+                error={
+                  formik.touched.startTime && Boolean(formik.errors.startTime)
+                }
                 helperText={formik.touched.startTime && formik.errors.startTime}
               />
             )}
@@ -170,7 +177,9 @@ const AdminTrainerAvailabilityForm: React.FC = () => {
           <TimePicker
             label="Hora fin"
             value={formik.values.endTime}
-            onChange={(value: Date | null) => formik.setFieldValue('endTime', value)}
+            onChange={(value: Date | null) =>
+              formik.setFieldValue('endTime', value)
+            }
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -182,11 +191,6 @@ const AdminTrainerAvailabilityForm: React.FC = () => {
             )}
           />
         </LocalizationProvider>
-
-        {submitError && <Alert severity="error">{submitError}</Alert>}
-        {submitSuccess && (
-          <Alert severity="success">Disponibilidad creada con éxito</Alert>
-        )}
 
         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
           <Button variant="contained" color="primary" type="submit">

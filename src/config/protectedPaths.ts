@@ -10,7 +10,12 @@ export const PROTECTED_PATHS = [
   '/users/measurements',
   '/admin/group-classes',
   '/store/cart',
-  '/auth/login',  // Agrega login explícitamente como protegido
-    '/admin/store/products',  // Añadimos las rutas aquí
-  '/admin/store/categories'
+  '/auth/login',  
+    '/admin/store/products',  
+    '/admin/store/products/page',
+  '/admin/store/categories',
+  '/admin/plans',
+  '/admin/planes',
+  '/admin/facturas'
+  
 ];

@@ -36,6 +36,8 @@ export const UserForm = ({ userSelected, handlerAddUser, handlerCloseForm }: Use
     studies: isTrainer ? Yup.string().required('Estudios son requeridos') : Yup.string(),
     certifications: isTrainer ? Yup.string().required('Certificaciones son requeridas') : Yup.string(),
     description: isTrainer ? Yup.string().required('Descripción es requerida') : Yup.string(),
+    instagramUrl: Yup.string().notRequired(),
+    whatsappNumber: Yup.string().notRequired()
   });
 
   const formik = useFormik({
@@ -54,6 +56,9 @@ export const UserForm = ({ userSelected, handlerAddUser, handlerCloseForm }: Use
       studies: '',
       certifications: '',
       description: '',
+      instagramUrl: '',
+      whatsappNumber: '',
+      certificationFile: undefined,
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
@@ -218,6 +223,35 @@ export const UserForm = ({ userSelected, handlerAddUser, handlerCloseForm }: Use
             error={formik.touched.description && Boolean(formik.errors.description)}
             helperText={formik.touched.description && formik.errors.description}
           />
+<TextField
+  fullWidth
+  margin="normal"
+  label="Instagram (opcional)"
+  name="instagramUrl" // <--- sin "trainerDetails."
+  value={formik.values.instagramUrl}
+  onChange={formik.handleChange}
+/>
+<TextField
+  fullWidth
+  margin="normal"
+  label="WhatsApp (opcional)"
+  name="whatsappNumber"
+  value={formik.values.whatsappNumber}
+  onChange={formik.handleChange}
+/>
+<Typography variant="subtitle1" sx={{ mt: 2 }}>
+      Certificación (PDF / imagen)
+    </Typography>
+    <input
+      type="file"
+      name="certificationFile"
+      onChange={(e) => {
+        if (e.currentTarget.files && e.currentTarget.files.length > 0) {
+          formik.setFieldValue('certificationFile', e.currentTarget.files[0]);
+        }
+      }}
+    />
+
         </>
       )}
 

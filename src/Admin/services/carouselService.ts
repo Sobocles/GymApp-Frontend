@@ -43,12 +43,16 @@ export const uploadCarouselImage = async (
     caption?: string,
     orderNumber?: number
   ) => {
+    console.log(id,
+      caption,
+      orderNumber)
     const formData = new FormData();
     if (caption) formData.append('caption', caption);
     if (orderNumber !== undefined) formData.append('order', orderNumber.toString());
   
     try {
       const response = await apiClient.put(`/carousel/images/${id}`, formData);
+      console.log("response",response);
       return response.data;
     } catch (error) {
       console.error('Error al actualizar la imagen:', error);

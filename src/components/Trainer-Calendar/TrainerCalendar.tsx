@@ -281,17 +281,18 @@ const TrainerCalendar: React.FC = () => {
 
       {trainerId ? (
         <Calendar
-          localizer={localizer}
-          events={events}
-          startAccessor="start"
-          endAccessor="end"
-          style={{ height: 600 }}
-          selectable
-          onSelectSlot={handleSelectSlot}
-          onSelectEvent={handleSelectEvent}
-          views={['week']}
-          defaultView="week"
-          popup
+        key={location.key}
+        localizer={localizer}
+        events={events}
+        startAccessor="start"
+        endAccessor="end"
+        style={{ height: 600 }}
+        selectable
+        onSelectSlot={handleSelectSlot}
+        onSelectEvent={handleSelectEvent}
+        views={['week']}             // Solo mostramos la vista de semana
+        defaultView="week"           // Vista por defecto 'week'
+        popup
           eventPropGetter={() => ({
             style: {
               backgroundColor: 'green',

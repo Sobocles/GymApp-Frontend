@@ -7,8 +7,8 @@ export interface Category {
 }
 
 export const getAllCategories = async (): Promise<Category[]> => {
-  console.log("AQUI");
+
   const response = await apiClient.get('/store/categories');
-  console.log("AQUI LAS RESPONSE",response);
+
   return response.data;
 };

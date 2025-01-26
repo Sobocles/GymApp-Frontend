@@ -12,7 +12,8 @@ import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import MedicalInformationIcon from '@mui/icons-material/MedicalInformation';
 import MeasurementsIcon from '@mui/icons-material/FitnessCenter';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 
 export interface MenuItem {
   label: string;
@@ -26,14 +27,12 @@ export interface MenuItem {
   }[];
 }
 
-
 export const menuItems: MenuItem[] = [
-
   {
     label: 'Dashboard Admin',
     path: '/admin/dashboard',
     icon: DashboardIcon,
-    roles: ['ROLE_ADMIN']
+    roles: ['ROLE_ADMIN'],
   },
   {
     label: 'Dashboard User',
@@ -47,7 +46,6 @@ export const menuItems: MenuItem[] = [
     icon: CalendarTodayIcon,
     roles: ['ROLE_USER'],
   },
-  
   {
     label: 'Usuarios',
     path: '/admin/users',
@@ -61,6 +59,24 @@ export const menuItems: MenuItem[] = [
     roles: ['ROLE_TRAINER'],
   },
   {
+    label: 'Planes',
+    path: '#', // Para activar el dropdown
+    icon: AssignmentIcon,
+    roles: ['ROLE_ADMIN'],
+    subItems: [
+      {
+        label: 'Gestión de planes',
+        path: '/admin/plans',
+        roles: ['ROLE_ADMIN'],
+      },
+      {
+        label: 'Facturas de planes',
+        path: '/admin/planes/page/0',
+        roles: ['ROLE_ADMIN'],
+      },
+    ],
+  },
+  {
     label: 'Administrador de Carrusel',
     path: '/admin/carousel',
     icon: PhotoLibraryIcon,
@@ -70,13 +86,32 @@ export const menuItems: MenuItem[] = [
     label: 'Editar Perfil',
     path: '/trainers/edit-profile',
     icon: AccountCircleIcon,
-    roles: ['ROLE_TRAINER','ROLE_USER'],
+    roles: ['ROLE_TRAINER', 'ROLE_USER'],
   },
   {
-    label: 'Gestión de Productos',
-    path: '/admin/store/products',
+    // ⚠️ Antes estaba “Gestión de Productos” suelto, lo eliminamos para agruparlo con Facturas en un dropdown
+    // label: 'Gestión de Productos',
+    // path: '/admin/store/products',
+    // icon: ShoppingCartIcon,
+    // roles: ['ROLE_ADMIN'],
+
+    // Nuevo item "Productos" con submenú:
+    label: 'Productos',
+    path: '#',
     icon: ShoppingCartIcon,
     roles: ['ROLE_ADMIN'],
+    subItems: [
+      {
+        label: 'Gestión de productos',
+        path: '/admin/store/products',
+        roles: ['ROLE_ADMIN'],
+      },
+      {
+        label: 'Facturas de productos',
+        path: '/admin/facturas/page/0',
+        roles: ['ROLE_ADMIN'],
+      },
+    ],
   },
   {
     label: 'Gestión de Categorías',
@@ -84,7 +119,6 @@ export const menuItems: MenuItem[] = [
     icon: ShoppingCartIcon,
     roles: ['ROLE_ADMIN'],
   },
-
   {
     label: 'Calendario',
     path: '/dashboard/calendar',
@@ -101,7 +135,7 @@ export const menuItems: MenuItem[] = [
     label: 'Agregar Medición',
     path: '/trainers/clients/1/measurements/add',
     icon: MedicalInformationIcon,
-    roles: ['ROLE_TRAINER'], 
+    roles: ['ROLE_TRAINER'],
   },
   {
     label: 'Agregar Rutina',
@@ -111,14 +145,14 @@ export const menuItems: MenuItem[] = [
   },
   {
     label: 'Mediciones',
-    path: '/users/measurements', 
+    path: '/users/measurements',
     icon: MeasurementsIcon,
     roles: ['ROLE_USER'],
   },
   {
     label: 'Clases Grupales',
     path: '/admin/group-classes/create',
-    icon: FitnessCenterIcon, // el icono que prefieras
+    icon: FitnessCenterIcon,
     roles: ['ROLE_ADMIN'],
   },
   {
@@ -133,15 +167,30 @@ export const menuItems: MenuItem[] = [
     icon: FitnessCenterIcon,
     roles: ['ROLE_USER'],
   },
-
   {
     label: 'Mi Calendario (Trainer)',
     path: '/trainers/my-calendar',
     icon: CalendarTodayIcon,
     roles: ['ROLE_TRAINER'],
   },
-  
-  
+
+  // ⚠️ Antes estaba “Facturas” suelto, lo eliminamos para agruparlo en “Productos”:
+  // {
+  //   label: 'Facturas',
+  //   path: '/admin/facturas/page/0',
+  //   icon: ReceiptIcon,
+  //   roles: ['ROLE_ADMIN'],
+  // },
+
+  // Este “Planes” al final parece duplicado, podrías borrarlo si ya manejaste planes arriba
+  // {
+  //   label: 'Planes',
+  //   path: '/admin/planes/page/0',
+  //   icon: AssignmentIcon,
+  //   roles: ['ROLE_ADMIN'],
+  // },
+
+  // Tienes un submenú de tienda para usuarios y trainers
   {
     label: 'Tienda',
     path: '/store',
@@ -160,5 +209,4 @@ export const menuItems: MenuItem[] = [
       },
     ],
   },
-  
 ];

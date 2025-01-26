@@ -79,23 +79,28 @@ const CarouselAdminPage: React.FC = () => {
 
   const handleUpdate = async () => {
     if (editingId === null) return;
+  
     try {
       const formData = new FormData();
       formData.append('caption', caption);
       formData.append('order', orderNumber.toString());
   
-      // Si hay una nueva imagen seleccionada, agregarla al formData
+      // Incluir archivo solo si se seleccionó uno nuevo
       if (selectedFile) {
         formData.append('file', selectedFile);
       }
   
-      await updateCarouselImage(editingId, caption, orderNumber);
-      fetchImages();
-      handleCloseModal();
+      console.log('FormData enviado:', formData);
+  
+      // Llamar al servicio con el FormData
+      await updateCarouselImage(editingId, formData);
+      fetchImages(); // Refrescar las imágenes
+      handleCloseModal(); // Cerrar el modal
     } catch (error) {
       console.error('Error al actualizar imagen:', error);
     }
   };
+  
   
   
   const handleDelete = async (id: number) => {
@@ -184,15 +189,24 @@ const CarouselAdminPage: React.FC = () => {
     </Button>
     {selectedFile && <Typography sx={{ mt: 1 }}>{selectedFile.name}</Typography>}
 
-    <Button
-      variant="contained"
-      color="primary"
-      onClick={editingId ? handleUpdate : handleUpload}
-      sx={{ mt: 2 }}
-      disabled={!selectedFile && !editingId}
+    {/* Contenedor para centrar el botón */}
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        mt: 2,
+      }}
     >
-      {editingId ? 'Actualizar' : 'Subir'}
-    </Button>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={editingId ? handleUpdate : handleUpload}
+        disabled={!selectedFile && !editingId}
+      >
+        {editingId ? 'Actualizar' : 'Subir'}
+      </Button>
+    </Box>
   </Box>
 </Modal>
 

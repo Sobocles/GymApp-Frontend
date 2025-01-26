@@ -4,14 +4,14 @@ import { useUsers } from "../hooks/useUsers";
 import { UserModalForm } from "../components/useModalForm";
 import { UsersList } from "../components/UsersList";
 import { Box, Button, Typography } from '@mui/material';
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { Paginator } from "../components/Paginator";
 import SearchBar from "../../components/common/SearchBar";
 
 export const UsersPage = () => {
-    const location = useLocation();  // Obtenemos la ubicación actual
-    const queryParams = new URLSearchParams(location.search);
-const page = parseInt(queryParams.get('page') || '0', 10);
+  const { page: pageParam } = useParams();
+  // Si no existe, fallback a '0'
+  const currentPage = parseInt(pageParam ?? '0', 10);
 
 
     const {
@@ -27,8 +27,8 @@ const page = parseInt(queryParams.get('page') || '0', 10);
     const { login } = useAuth();
 
     useEffect(() => {
-        getUsers(page);  // Llamamos a getUsers con la página correcta
-    }, [page, searchTerm]);  // Escuchamos los cambios de página y términos de búsqueda
+        getUsers(currentPage);  // Llamamos a getUsers con la página correcta
+    }, [currentPage, searchTerm]);  // Escuchamos los cambios de página y términos de búsqueda
 
     return (
         <>

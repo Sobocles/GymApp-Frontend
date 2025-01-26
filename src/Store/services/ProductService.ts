@@ -2,6 +2,7 @@
     import apiClient from '../../Apis/apiConfig';
 import { Product } from '../interface/Product';
 import { CartItem } from '../Store/slices/cartSlice';
+import { Category } from './CategoryService';
 
 
 interface ProductPage {
@@ -10,7 +11,7 @@ interface ProductPage {
   totalPages: number;  // total de páginas
   first: boolean;
   last: boolean;
-  // ... otros campos que Page<Product> devuelva
+ 
 }
   interface AdvancedSearchPayload {
     page: number;
@@ -66,7 +67,7 @@ interface ProductPage {
     params.size = size;
   
     const response = await apiClient.get(`/store/products/page/${page}`, { params });
-    console.log("response",response);
+    console.log("obtener datos paginacion getProductPage",response);
     return response.data;  
   };
   
@@ -133,6 +134,32 @@ export async function advancedSearchProducts(
   console.log("search2 response", response);
   return response.data;
 }
+
+export const getAllCategories = async (): Promise<Category[]> => {
+  const response = await apiClient.get('/store/categories');
+  return response.data;
+};
+
+export const createProduct = async (formData: FormData): Promise<Product> => {
+  const response = await apiClient.post('/store/products', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data;
+};
+export const updateProduct = async (id: number, formData: FormData): Promise<Product> => {
+  const response = await apiClient.put(`/store/products/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data;
+};
+
+
+
+export const deleteProduct = async (id: number): Promise<void> => {
+  await apiClient.delete(`/store/products/${id}`);
+};
+
+
 
 
 

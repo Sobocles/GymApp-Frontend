@@ -3,22 +3,27 @@ import { Link } from 'react-router-dom';
 import { Box } from '@mui/material';
 
 interface PaginatorProps {
-  url: string; // URL base, p.ej. "/store"
+  url: string;
   paginator: {
     number: number;
     totalPages: number;
     first: boolean;
     last: boolean;
   };
-  sortBy: string; // <-- nueva prop
+  sortBy?: string; // <-- la interrogación indica que es opcional
 }
 
+
 export const Paginator = ({ url, paginator, sortBy }: PaginatorProps) => {
-  console.log("PAGINATOR",url, paginator, sortBy);
+
+  const order = sortBy || '';
+
+  
 
   const { number, totalPages, first, last } = paginator;
 
-  console.log("PAGINATOR",number, totalPages, first, last);
+  
+  
 
   if (totalPages <= 1) return null;
 
@@ -42,12 +47,7 @@ export const Paginator = ({ url, paginator, sortBy }: PaginatorProps) => {
         {/* Botón Anterior */}
         {!first && (
           <li className="page-item" style={{ margin: '0 5px' }}>
-            <Link
-              className="page-link"
-              to={`${url}/page/${Math.max(0, number - 1)}?sortBy=${sortBy}`}
-            >
-              Anterior
-            </Link>
+           <Link to={`${url}/page/${paginator.number - 1}`}>Anterior</Link>
           </li>
         )}
 
@@ -70,12 +70,7 @@ export const Paginator = ({ url, paginator, sortBy }: PaginatorProps) => {
         {/* Botón Siguiente */}
         {!last && (
           <li className="page-item" style={{ margin: '0 5px' }}>
-            <Link
-              className="page-link"
-              to={`${url}/page/${number + 1}?sortBy=${sortBy}`}
-            >
-              Siguiente
-            </Link>
+            <Link to={`${url}/page/${paginator.number + 1}`}>Siguiente</Link>
           </li>
         )}
       </ul>

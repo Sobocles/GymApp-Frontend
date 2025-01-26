@@ -24,18 +24,19 @@ const MainLayout = () => {
     typeof r === 'string' ? r : r.authority
   ) || [];
 
-  // Verificamos si es una ruta protegida (para mostrar u ocultar sidebar)
+  // Verificamos si es una ruta protegida (para mostrar/u ocultar sidebar)
   const isProtectedRoute = PROTECTED_PATHS.some((protectedPath) =>
     currentPath.startsWith(protectedPath.toLowerCase())
   );
 
-  const canSeeSidebar = isAuth && isProtectedRoute && (
-    userRoles.includes('ROLE_ADMIN') ||
-    userRoles.includes('ROLE_TRAINER') ||
-    userRoles.includes('ROLE_USER')
-  );
+  const canSeeSidebar =
+    isAuth &&
+    isProtectedRoute &&
+    (userRoles.includes('ROLE_ADMIN') ||
+      userRoles.includes('ROLE_TRAINER') ||
+      userRoles.includes('ROLE_USER'));
 
-  // Nuevo: Verificamos si la ruta es la Home ("/")
+  // Verificamos si la ruta es la Home ("/")
   const isHomePage = currentPath === '/';
 
   return (
@@ -48,12 +49,14 @@ const MainLayout = () => {
       <div style={{ display: 'flex', minHeight: '80vh' }}>
         {canSeeSidebar && <Sidebar />}
 
-        <div style={{ flex: 1, padding: '1rem' }}>
+        {/* Si es home => padding=0; caso contrario => padding='1rem' */}
+        <div style={{ flex: 1, padding: isHomePage ? 0 : '1rem' }}>
           <Outlet />
         </div>
       </div>
 
-      <Footer />
+      {/* MOSTRAR FOOTER SOLO SI NO ES RUTA PROTEGIDA */}
+      {!isProtectedRoute && <Footer />}
     </>
   );
 };

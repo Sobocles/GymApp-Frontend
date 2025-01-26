@@ -1,7 +1,13 @@
-// src/Trainers/pages/TrainerProfileEditPage.tsx
-
 import React, { useEffect } from 'react';
-import { Box, Button, TextField, Typography, Avatar } from '@mui/material';
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Avatar,
+  Paper,
+  Divider,
+} from '@mui/material';
 import { useAuth } from '../../Auth/hooks/useAuth';
 import { updateTrainerProfile } from '../services/TrainerService';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
@@ -14,12 +20,10 @@ export const TrainerProfileEditPage: React.FC = () => {
   const { login } = useAuth();
   const dispatch = useDispatch();
 
-  // Usar useEffect fuera del render prop de Formik
   useEffect(() => {
     console.log('Login User:', login.user);
   }, [login.user]);
 
-  // Esquema de validación con Yup
   const validationSchema = Yup.object({
     username: Yup.string().required('El nombre de usuario es requerido'),
     email: Yup.string()
@@ -29,13 +33,18 @@ export const TrainerProfileEditPage: React.FC = () => {
       .min(6, 'La contraseña debe tener al menos 6 caracteres')
       .notRequired(),
     file: Yup.mixed().notRequired(),
+    instagramUrl: Yup.string().notRequired(),
+    whatsappNumber: Yup.string().notRequired(),
   });
 
+  // Usa la información de login.user. Asegúrate de que si tienes información del entrenador esté en login.user.trainerInfo (o similar)
   const initialValues = {
     username: login.user?.username || '',
     email: login.user?.email || '',
     password: '',
     file: null as File | null,
+    instagramUrl: login.user?.trainerInfo?.instagramUrl || '',
+    whatsappNumber: login.user?.trainerInfo?.whatsappNumber || '',
   };
 
   const handleSubmit = async (
@@ -51,14 +60,10 @@ export const TrainerProfileEditPage: React.FC = () => {
     if (values.file) {
       formData.append('file', values.file);
     }
-
     try {
-      const updatedUser = await updateTrainerProfile(formData); // updatedUser es de tipo UserInterface
+      const updatedUser = await updateTrainerProfile(formData);
       console.log('Perfil actualizado:', updatedUser);
-
-      // Actualizar el estado global con los nuevos datos del usuario
       dispatch(updateProfile(updatedUser));
-
       Swal.fire({
         icon: 'success',
         title: 'Perfil actualizado',
@@ -66,7 +71,6 @@ export const TrainerProfileEditPage: React.FC = () => {
       });
     } catch (error: any) {
       console.error('Error actualizando perfil:', error);
-      // Mostrar SweetAlert de error
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -78,95 +82,130 @@ export const TrainerProfileEditPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Editar Perfil
-      </Typography>
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-        enableReinitialize // Habilita la re-inicialización cuando initialValues cambian
-      >
-        {({ setFieldValue, values, isSubmitting, errors, touched }) => {
-          // Opcional: Manejar la creación y limpieza de URLs de objetos aquí si es necesario
-          useEffect(() => {
-            if (values.file) {
-              const objectUrl = URL.createObjectURL(values.file);
-              return () => URL.revokeObjectURL(objectUrl);
-            }
-          }, [values.file]);
+    <Box
+      sx={{
+        p: 3,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '80vh',
+        background: '#f5f5f5',
+      }}
+    >
+      <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 600 }}>
+        <Typography variant="h4" align="center" gutterBottom>
+          Editar Perfil
+        </Typography>
+        <Divider sx={{ my: 2 }} />
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+          enableReinitialize
+        >
+          {({ handleChange, setFieldValue, values, isSubmitting, errors, touched }) => {
+            useEffect(() => {
+              if (values.file) {
+                const objectUrl = URL.createObjectURL(values.file);
+                return () => URL.revokeObjectURL(objectUrl);
+              }
+            }, [values.file]);
 
-          return (
-            <Form>
-              <Field
-                as={TextField}
-                name="username"
-                label="Nombre de usuario"
-                fullWidth
-                margin="normal"
-                helperText={<ErrorMessage name="username" />}
-                error={touched.username && Boolean(errors.username)}
-              />
-              <Field
-                as={TextField}
-                name="email"
-                type="email"
-                label="Correo electrónico"
-                fullWidth
-                margin="normal"
-                helperText={<ErrorMessage name="email" />}
-                error={touched.email && Boolean(errors.email)}
-              />
-              <Field
-                as={TextField}
-                name="password"
-                type="password"
-                label="Nueva contraseña"
-                fullWidth
-                margin="normal"
-                helperText={<ErrorMessage name="password" />}
-                error={touched.password && Boolean(errors.password)}
-              />
-
-              <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-                <Avatar
-                  alt={login.user?.username}
-                  src={
-                    values.file
-                      ? URL.createObjectURL(values.file)
-                      : login.user?.profileImageUrl || ''
-                  }
-                  sx={{ width: 60, height: 60, mr: 2 }}
-                />
-                <Button variant="contained" component="label">
-                  Subir Imagen de Perfil
-                  <input
-                    type="file"
-                    hidden
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      if (e.target.files && e.target.files[0]) {
-                        setFieldValue('file', e.target.files[0]);
-                      }
-                    }}
-                    accept="image/*"
+            return (
+              <Form>
+                <Box sx={{ mb: 2 }}>
+                  <Field
+                    as={TextField}
+                    name="username"
+                    label="Nombre de usuario"
+                    fullWidth
+                    variant="outlined"
+                    helperText={<ErrorMessage name="username" />}
+                    error={touched.username && Boolean(errors.username)}
                   />
-                </Button>
-              </Box>
-
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                sx={{ mt: 2 }}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
-              </Button>
-            </Form>
-          );
-        }}
-      </Formik>
+                </Box>
+                <Box sx={{ mb: 2 }}>
+                  <Field
+                    as={TextField}
+                    name="email"
+                    type="email"
+                    label="Correo electrónico"
+                    fullWidth
+                    variant="outlined"
+                    helperText={<ErrorMessage name="email" />}
+                    error={touched.email && Boolean(errors.email)}
+                  />
+                </Box>
+                <Box sx={{ mb: 2 }}>
+                  <Field
+                    as={TextField}
+                    name="password"
+                    type="password"
+                    label="Nueva contraseña"
+                    fullWidth
+                    variant="outlined"
+                    helperText={<ErrorMessage name="password" />}
+                    error={touched.password && Boolean(errors.password)}
+                  />
+                </Box>
+                <Box sx={{ mb: 2, display: 'flex', gap: 2 }}>
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    label="Instagram"
+                    name="instagramUrl"
+                    value={values.instagramUrl}
+                    onChange={handleChange}
+                  />
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    label="WhatsApp"
+                    name="whatsappNumber"
+                    value={values.whatsappNumber}
+                    onChange={handleChange}
+                  />
+                </Box>
+                <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+                  <Avatar
+                    alt={login.user?.username}
+                    src={
+                      values.file
+                        ? URL.createObjectURL(values.file)
+                        : login.user?.profileImageUrl || ''
+                    }
+                    sx={{ width: 60, height: 60, mr: 2 }}
+                  />
+                  <Button variant="contained" component="label">
+                    Subir Imagen
+                    <input
+                      type="file"
+                      hidden
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setFieldValue('file', e.target.files[0]);
+                        }
+                      }}
+                      accept="image/*"
+                    />
+                  </Button>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    size="large"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+                  </Button>
+                </Box>
+              </Form>
+            );
+          }}
+        </Formik>
+      </Paper>
     </Box>
   );
 };

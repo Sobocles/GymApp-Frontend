@@ -15,6 +15,8 @@ export interface TrainerDetails {
   studies?: string;
   certifications?: string;
   description?: string;
+  instagramUrl?: string;
+  whatsappNumber?: string;
 }
 
 export interface UserInterface {
@@ -29,6 +31,11 @@ export interface UserInterface {
   profileImageUrl?: string;
   // Detalles específicos de entrenadores
   trainerDetails?: TrainerDetails;
+    /**
+   * Campo opcional para adjuntar un archivo de certificación (PDF, imagen, etc.)
+   * cuando se marca el usuario como Trainer.
+   */
+    certificationFile?: File;
 }
 
 

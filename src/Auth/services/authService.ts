@@ -10,8 +10,7 @@ export const loginUser = async ({ email, password }: LoginCredentials) => {
     console.log(
       "entro");
     const response = await apiClient.post('/login', { email, password });
-    console.log("ACA RESPONSE",response);
-    console.log("ACA DATA",response.data);
+
     return response;
   } catch (error) {
     handleApiError(error);
@@ -24,13 +23,13 @@ export const registerUser = async (userData: {
   password: string;
 }) => {
   try {
-    console.log("AAAAAAAAAA",userData);
+
     const response = await axios.post('http://localhost:8080/users/register', userData, {
       headers: {
         'Content-Type': 'application/json',
       },
     });
-    console.log("AQUI LA RESPUESTA DEL REGISTER", response);
+  
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -40,18 +39,10 @@ export const registerUser = async (userData: {
 // Función para manejar errores
 const handleApiError = (error: unknown) => {
   if (axios.isAxiosError(error)) {
-    if (error.response) {
-      console.error(`Error ${error.response.status}: ${error.response.data.message || 'Error en el servidor'}`);
-      throw new Error(
-        `Error ${error.response.status}: ${
-          error.response.data.message || 'Error en el servidor'
-        }`
-      );
-    } else if (error.request) {
-      console.error('No se recibió respuesta del servidor. Verifica tu conexión.');
-      throw new Error('No se recibió respuesta del servidor. Verifica tu conexión.');
-    }
+    // Retiras el throw de new Error y simplemente relanzas el error original
+    throw error; 
   }
-  console.error('Ocurrió un error desconocido.');
+  // Si no es un AxiosError, aquí lanzas algo genérico
   throw new Error('Ocurrió un error desconocido.');
 };
+

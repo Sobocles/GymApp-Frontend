@@ -20,11 +20,8 @@ interface FilterSectionProps {
   selectedFlavors: string[];
   setSelectedFlavors: React.Dispatch<React.SetStateAction<string[]>>;
 
-  // Opcional, si manejas rango aquí
-  priceRange?: number[];
-  setPriceRange?: React.Dispatch<React.SetStateAction<number[]>>;
-
   brands: string[]; 
+  flavors: string[];              // <-- Ahora recibimos flavors dinámicos
 }
 
 const FilterSection: React.FC<FilterSectionProps> = ({
@@ -34,40 +31,33 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   setSelectedBrands,
   selectedFlavors,
   setSelectedFlavors,
-  priceRange,
-  setPriceRange,
   brands,
+  flavors, 
 }) => {
 
   const handleInStockChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCheckBoxInStock(e.target.checked);
   };
 
-  // Ejemplo de cambio de marca
   const handleBrandToggle = (brand: string) => {
     setSelectedBrands((prev) =>
       prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
     );
   };
 
-  // Lo mismo con Sabor...
   const handleFlavorToggle = (flavor: string) => {
-    setSelectedFlavors(prev => {
-      if (prev.includes(flavor)) {
-        return prev.filter(f => f !== flavor);
-      } else {
-        return [...prev, flavor];
-      }
-    });
+    setSelectedFlavors((prev) =>
+      prev.includes(flavor) ? prev.filter((f) => f !== flavor) : [...prev, flavor]
+    );
   };
 
-  // ...
   return (
     <Box display="flex" flexDirection="column" gap={2}>
       <Typography variant="h6" gutterBottom>
         Filtros
       </Typography>
 
+      {/* Disponibilidad */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography>Disponibilidad</Typography>
@@ -76,8 +66,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           <Box display="flex" flexDirection="column">
             <FormControlLabel
               control={
-                <Checkbox 
-                  name="inStock" 
+                <Checkbox
+                  name="inStock"
                   checked={checkBoxInStock}
                   onChange={handleInStockChange}
                 />
@@ -88,52 +78,51 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         </AccordionDetails>
       </Accordion>
 
+      {/* Marcas */}
       <Accordion>
-  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-    <Typography>Marca</Typography>
-  </AccordionSummary>
-  <AccordionDetails>
-    {brands.map((brand) => (
-      <FormControlLabel
-        key={brand}  // Usa la marca como clave única
-        control={
-          <Checkbox
-            checked={selectedBrands.includes(brand)}  // Verifica si la marca está seleccionada
-            onChange={() => handleBrandToggle(brand)}  // Cambia la selección al hacer clic
-          />
-        }
-        label={brand}  // Muestra el nombre de la marca
-      />
-    ))}
-  </AccordionDetails>
-</Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography>Marca</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {brands.map((brand) => (
+            <FormControlLabel
+              key={brand}
+              control={
+                <Checkbox
+                  checked={selectedBrands.includes(brand)}
+                  onChange={() => handleBrandToggle(brand)}
+                />
+              }
+              label={brand}
+            />
+          ))}
+        </AccordionDetails>
+      </Accordion>
 
-
+      {/* Sabores (Dinámicos) */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography>Sabor</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {/* Igualmente, un array de sabores */}
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={selectedFlavors.includes('Chocolate')}
-                onChange={() => handleFlavorToggle('Chocolate')}
+          {flavors.length === 0 ? (
+            <Typography variant="body2">
+              No hay sabores registrados.
+            </Typography>
+          ) : (
+            flavors.map((flavor) => (
+              <FormControlLabel
+                key={flavor}
+                control={
+                  <Checkbox
+                    checked={selectedFlavors.includes(flavor)}
+                    onChange={() => handleFlavorToggle(flavor)}
+                  />
+                }
+                label={flavor}
               />
-            }
-            label="Chocolate"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={selectedFlavors.includes('Vainilla')}
-                onChange={() => handleFlavorToggle('Vainilla')}
-              />
-            }
-            label="Vainilla"
-          />
-          {/* ... */}
+            ))
+          )}
         </AccordionDetails>
       </Accordion>
     </Box>

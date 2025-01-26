@@ -38,6 +38,10 @@ import TrainerCalendar from '../components/Trainer-Calendar/TrainerCalendar';
 import TrainerSessionsCalendar from '../Users/components/TrainerSessionsCalendar';
 import { CategoryCrud } from '../Admin/pages/CategoryCrud';
 import { ProductCrud } from '../Admin/pages/ProductCrud';
+import AdminPlanCrudPage from '../Admin/pages/AdminPlanCrudPage';
+import PaymentFailurePage from '../Users/pages/mercadoPago/PaymentPendingPage';
+import AdminFacturasPage from '../Admin/pages/AdminFacturasPage';
+import AdminPlanesPage from '../Admin/pages/AdminPlanesPage';
 
 export const AppRouter = () => {
   const { isAuth } = useSelector((state: RootState) => state.auth);
@@ -61,6 +65,8 @@ export const AppRouter = () => {
 
         {/* Éxito de pago (pública) */}
         <Route path="success" element={<PaymentSuccessPage />} />
+
+        <Route path="failure" element={<PaymentFailurePage />} />
 
         {/* Entrenadores (selector) */}
         <Route path="personal-trainer" element={<PersonalTrainerPage />} />
@@ -91,7 +97,10 @@ export const AppRouter = () => {
         path="dashboard/trainer-sessions"
         element={isAuth ? <TrainerSessionsCalendar /> : <Navigate to="/auth/login" />}
       />
-
+  <Route
+  path="admin/plans"
+  element={ isAuth ? <AdminPlanCrudPage /> : <Navigate to="/auth/login" /> }
+/>
               <Route
         path="trainers/my-calendar"
         element={ isAuth ? <TrainerCalendarPage /> : <Navigate to="/auth/login" /> }
@@ -112,7 +121,11 @@ export const AppRouter = () => {
         element={isAuth ? <CategoryCrud /> : <Navigate to="/auth/login" />}
       />
       <Route
-        path="admin/store/products"
+  path="/admin/store/products"
+  element={isAuth ? <ProductCrud /> : <Navigate to="/auth/login" />}
+/>
+      <Route
+        path="/admin/store/products/page/:page"
         element={isAuth ? <ProductCrud /> : <Navigate to="/auth/login" />}
       />
 
@@ -171,6 +184,23 @@ export const AppRouter = () => {
           path="users/group-classes/available"
           element={isAuth ? <AvailableClassesPage /> : <Navigate to="/auth/login" />}
         />
+
+    <Route
+        path="admin/plans"
+        element={ isAuth ? <AdminPlanCrudPage /> : <Navigate to="/auth/login" /> }
+      />
+
+      
+
+        {/* Ruta paginada para Facturas */}
+        <Route
+  path="admin/facturas/page/:page"
+  element={isAuth ? <AdminFacturasPage /> : <Navigate to="/auth/login" />}
+/>
+      <Route
+        path="admin/planes/page/:page"
+        element={isAuth ? <AdminPlanesPage /> : <Navigate to="/auth/login" />}
+      />
  
       
         <Route path="*" element={<Navigate to="/" />} />

@@ -58,6 +58,8 @@ const TrainerSessionsCalendar: React.FC = () => {
         startAccessor="start"
         endAccessor="end"
         style={{ margin: '50px' }}
+        views={['week']}             // Solo mostramos la vista de semana
+        defaultView="week"           // Vista por defecto 'week'
       />
     </div>
   );

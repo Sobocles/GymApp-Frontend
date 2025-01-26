@@ -1,11 +1,9 @@
-// src/Auth/pages/Register/RegistrationPage.tsx
-
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import './RegisterPage.css';
 import { registerUser } from '../../services/authService';
-
 
 export const RegistrationPage = () => {
     const navigate = useNavigate();
@@ -27,7 +25,7 @@ export const RegistrationPage = () => {
             password: Yup.string()
                 .min(6, 'La contraseña debe tener al menos 6 caracteres')
                 .required('Requerido'),
-        
+            // Puedes agregar validación para confirmPassword si lo necesitas
         }),
         onSubmit: async (values) => {
             try {
@@ -36,13 +34,52 @@ export const RegistrationPage = () => {
                     email: values.email,
                     password: values.password,
                 });
-                navigate('/auth/login');
-            } catch (error) {
-                console.error('Error al registrar:', error);
-                // Manejar errores, por ejemplo, mostrar un mensaje al usuario
+
+                // Si el registro fue exitoso mostramos el mensaje y redirigimos
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Registro exitoso',
+                    text: 'Tu cuenta ha sido creada correctamente.',
+                    confirmButtonText: 'Continuar'
+                }).then(() => {
+                    navigate('/auth/login');
+                });
+            } catch (error: any) {
+                // Si el backend envía un mensaje específico, se captura y muestra
+                if (error.response && error.response.data && error.response.data.message) {
+                    const errorMessage: string = error.response.data.message;
+                    // Validación para correo duplicado
+                    if(errorMessage === 'El correo electrónico ya está en uso'){
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Correo ya registrado',
+                            text: 'El correo electrónico que ingresaste ya está en uso. Por favor, usa otro correo.'
+                        });
+                    } else if(errorMessage === 'El nombre de usuario ya está en uso'){
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Nombre de usuario en uso',
+                            text: 'El nombre de usuario que ingresaste ya está en uso. Por favor, escoge otro.'
+                        });
+                    } else {
+                        // Si es otro error, mostramos el mensaje devuelto por el backend
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error al registrar',
+                            text: errorMessage,
+                        });
+                    }
+                } else {
+                    // En caso de error inesperado sin estructura definida
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error inesperado',
+                        text: 'Ocurrió un error, por favor intenta nuevamente.'
+                    });
+                }
             }
         }
-    })
+    });
 
     return (
         <div className="container login-container">
@@ -86,9 +123,7 @@ export const RegistrationPage = () => {
                             )}
                         </div>
 
-                        <div className="form-group mb-2">
-                        
-                        </div>
+                        {/* Aquí podrías agregar el input de confirmPassword si lo requieres */}
 
                         <div className="d-grid gap-2">
                             <input

@@ -8,6 +8,10 @@ export interface Product {
   description?: string;
   imageUrl?: string;
   price: number;
+  discountPercent: number;
+  discountReason: string;
+  discountStart?: string; // Agregar si es necesario
+  discountEnd?: string;   // Agregar si es necesario
   category: {
     id: number;
     name: string;

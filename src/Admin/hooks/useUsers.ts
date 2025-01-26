@@ -45,11 +45,13 @@ export const useUsers = () => {
       // Crear el usuario
       const response = await userService.save(user);
       const createdUser = response.data;
+      console.log("usuario creado",createdUser)
 
       dispatch(addUser(createdUser));
 
       // Si el usuario es un trainer, asignar el rol de trainer y crear PersonalTrainer
       if (user.trainer) {
+        console.log(user.trainer);
         const trainerData = {
           specialization: (user as any).specialization,
           experienceYears: (user as any).experienceYears,
@@ -59,9 +61,50 @@ export const useUsers = () => {
           studies: (user as any).studies,
           certifications: (user as any).certifications,
           description: (user as any).description,
-        };
+          instagramUrl: (user as any).instagramUrl,      // <-- del root
+          whatsappNumber: (user as any).whatsappNumber
 
-        await apiClient.post(`/trainers/${createdUser.id}/assign`, trainerData);
+        };
+        console.log("trainerData",trainerData);
+        const formData = new FormData();
+
+
+        formData.append('specialization', trainerData.specialization);
+        formData.append('experienceYears', String(trainerData.experienceYears));
+        formData.append('availability', String(trainerData.availability));
+        formData.append('monthlyFee', String(trainerData.monthlyFee));
+        formData.append('title', trainerData.title);
+        formData.append('studies', trainerData.studies);
+        formData.append('certifications', trainerData.certifications);
+        formData.append('description', trainerData.description);
+        
+        if (trainerData.instagramUrl) {
+          formData.append('instagramUrl', trainerData.instagramUrl);
+        }
+        if (trainerData.whatsappNumber) {
+          formData.append('whatsappNumber', trainerData.whatsappNumber);
+        }
+        
+        // Y si hay un archivo
+        if (user.certificationFile) {
+          formData.append('certificationFile', user.certificationFile);
+        }
+  
+        // Si se subió archivo, lo añadimos:
+        if (user.certificationFile) {
+          formData.append('certificationFile', user.certificationFile);
+        }
+  
+        // Llamamos a /trainers/{createdUser.id}/assign
+        const response = await apiClient.post(
+          `/trainers/${createdUser.id}/assign`,
+          formData,
+          {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          }
+        );
+        
+        console.log(response);
       }
 
     } catch (error: any) {

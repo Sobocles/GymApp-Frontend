@@ -25,13 +25,11 @@ export const useAuth = () => {
     try {
       const response = await loginUser({ email, password });
 
-      console.log("ACA LA OTRA RESPONSE", response);
 
       const token = response.data.token;
       const claims = JSON.parse(window.atob(token.split(".")[1]));
 
-      console.log('ACA LOS CLAMIS Claims:', claims);
-      console.log('Authorities:', claims.authorities);
+
 
       // Extraer roles
       let rolesArray: string[] = [];
@@ -93,7 +91,7 @@ export const useAuth = () => {
       }
       
 
-      console.log('AQUI ESTA EL USER:', user);
+
 
       dispatch(onLogin({
         user,
