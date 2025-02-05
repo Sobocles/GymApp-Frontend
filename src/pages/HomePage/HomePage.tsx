@@ -10,14 +10,14 @@ import 'swiper/css/navigation';
 
 // Tus imágenes locales
 import './HomePage.css';
-import img1 from '../../../../GestorGymPro/src/assets/Equipamiento.png';
-import img2 from '../../../../GestorGymPro/src/assets/Clases_grupales.png';
-import img3 from '../../../../GestorGymPro/src/assets/Personal_Trainer.png';
-import img4 from '../../../../GestorGymPro/src/assets/Suplementos.png';
-import planImg from '../../../../GestorGymPro/src/assets/t600x362.jpg';
-import renuevaImg from '../../../../GestorGymPro/src/assets/smart-fit.jpg';
-import semaforoImg from '../../../../GestorGymPro/src/assets/entrenador-personal-madrid.jpg';
-import gratisImg from '../../../../GestorGymPro/src/assets/reserva.png';
+import img1 from '../../assets/Equipamiento.png';
+import img2 from '../../assets/Clases_grupales.png';
+import img3 from '../../assets/Personal_Trainer.png';
+import img4 from '../../assets/Suplementos.png';
+import planImg from '../../assets/t600x362.jpg';
+import renuevaImg from '../../assets/smart-fit.jpg';
+import semaforoImg from '../../assets/entrenador-personal-madrid.jpg';
+import gratisImg from '../../assets/reserva.png';
 import { Product } from '../../Store/interface/Product';
 // Importamos la función que obtiene los productos en oferta
 import { getDiscountedProducts } from '../../services/DiscountedProductsService';
