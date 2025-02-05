@@ -28,7 +28,7 @@ export const ProductList: React.FC<Props> = ({ products, onEdit, onDelete }) => 
         <TableCell><strong>Descripción</strong></TableCell>
         <TableCell><strong>Categoría</strong></TableCell>
         <TableCell><strong>Precio</strong></TableCell>
-        <TableCell><strong>Stock</strong></TableCell> {/* Nueva columna */}
+        <TableCell><strong>Stock</strong></TableCell> 
         <TableCell><strong>Marca</strong></TableCell>
         <TableCell><strong>Sabor</strong></TableCell>
         <TableCell><strong>Imagen</strong></TableCell>
@@ -48,7 +48,6 @@ export const ProductList: React.FC<Props> = ({ products, onEdit, onDelete }) => 
           ? p.category
           : (p.category as any)?.name ?? 'Sin categoría'}
       </TableCell>
-      <TableCell>{p.price}</TableCell>
       <TableCell>{p.stock}</TableCell> {/* Mostramos el stock aquí */}
       <TableCell>{p.brand || 'Sin marca'}</TableCell>
       <TableCell>{p.flavor || 'Sin sabor'}</TableCell>

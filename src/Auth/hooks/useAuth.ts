@@ -27,48 +27,41 @@ export const useAuth = () => {
 
 
       const token = response.data.token;
+      console.log("aqui el token",token);
       const claims = JSON.parse(window.atob(token.split(".")[1]));
-
+      console.log("aqui los claims",claims);
 
 
       // Extraer roles
       let rolesArray: string[] = [];
-      if (claims.authorities) {
-        let authorities;
-        if (typeof claims.authorities === 'string') {
-          // Parseamos la cadena JSON
-          try {
-            authorities = JSON.parse(claims.authorities);
-          } catch (e) {
-            authorities = [];
-          }
-        } else {
-          authorities = claims.authorities;
-        }
 
-        if (Array.isArray(authorities)) {
-          rolesArray = authorities.map((roleObj: any) => {
-            if (typeof roleObj === 'string') {
-              return roleObj;
-            } else if (roleObj && roleObj.authority) {
-              return roleObj.authority;
-            } else {
-              return '';
-            }
-          }).filter(role => role); // Filtrar strings vacíos
-        }
-      }
-      console.log("HOLAAAAAAAAAAAAAAA");
-      const user: UserInterface = {
-        id: claims.id || '', // ID si está disponible
-        username: claims.username || '', // Asignar correctamente el nombre de usuario
-        email: claims.sub || email,      // Asignar correctamente el correo electrónico
-        admin: claims.isAdmin || false,
-        trainer: claims.isTrainer || false,
-        roles: rolesArray.map(role => ({ authority: role })),
-        profileImageUrl: claims.profileImageUrl || '',
-      };
-      
+if (claims.authorities) {
+  let authorities = claims.authorities;
+  // Si es un string JSON, parsear.
+  if (typeof authorities === 'string') {
+    try {
+      authorities = JSON.parse(authorities);
+    } catch (e) {
+      authorities = [];
+    }
+  }
+  // Filtrar a strings
+  if (Array.isArray(authorities)) {
+    rolesArray = authorities.map((r: any) => (typeof r === 'string' ? r : ''));
+  }
+}
+
+const user: UserInterface = {
+  id: claims.id || 0,
+  username: claims.username || '',
+  email: claims.sub || email,
+  admin: claims.isAdmin || false,
+  trainer: claims.isTrainer || false,
+  // <-- ¡AQUÍ!: roles como array de strings
+  roles: rolesArray,
+  profileImageUrl: claims.profileImageUrl || '',
+};
+      console.log("aqui el usuario",user);
       if (user.trainer) {
         console.log("AQUI EDELGARD entro al if user.trainer ",user);
         try {
@@ -120,7 +113,7 @@ export const useAuth = () => {
         navigate('/admin/dashboard');
       } else if (user.trainer) {
         console.log("Navegando a /trainers para entrenador");
-        navigate('/trainers');
+        navigate('/trainers/dashboard');
       } else {
         console.log("Navegando a /dashboard para usuarios regulares");
         navigate('/dashboard');

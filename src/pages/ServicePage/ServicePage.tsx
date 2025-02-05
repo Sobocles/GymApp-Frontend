@@ -15,7 +15,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { useNavigate, useLocation } from 'react-router-dom';
 import apiClient from '../../Apis/apiConfig';
-import { Plan } from '../../Interface/Plan.ts';
+import { Plan } from '../../Store/interface/Plan.ts';
 import PesasCadaDia from '../../assets/Pesas-cada-dia.jpg';
 
 
@@ -107,107 +107,229 @@ const ServicePage = () => {
   }
 
   return (
-    <Box sx={{ padding: 4 }}>
-      {/* SPINNER (BACKDROP) */}
-      <Backdrop open={paymentLoading} sx={{ color: '#fff', zIndex: 9999 }}>
-        <CircularProgress color="inherit" />
+    <Box sx={{ 
+      padding: 6,
+      minHeight: '100vh',
+      backgroundColor: 'white',
+      color: '#2a2a2a'
+    }}>
+      <Backdrop open={paymentLoading} sx={{ 
+        zIndex: 9999,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)'
+      }}>
+        <CircularProgress size={80} color="primary" />
       </Backdrop>
 
-      <Typography variant="h4" align="center" gutterBottom>
-        Nuestros Planes
+      <Typography variant="h3" align="center" gutterBottom sx={{
+        fontWeight: 'bold',
+        mb: 8,
+        textTransform: 'uppercase',
+        color: '#1976d2',
+        letterSpacing: 4,
+        position: 'relative',
+        '&::after': {
+          content: '""',
+          display: 'block',
+          width: '60px',
+          height: '4px',
+          backgroundColor: '#1976d2',
+          margin: '20px auto 0'
+        }
+      }}>
+        Transforma tu Cuerpo
       </Typography>
 
-      <Grid container spacing={4}>
+      <Grid container spacing={6} justifyContent="center">
         {plans.map((plan) => (
           <Grid item xs={12} sm={6} md={4} key={plan.id}>
-            <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <CardMedia
-  component="img"
-  height="160"
-  image={PesasCadaDia}
-  alt="Pesas cada día"
-/>
+            <Card sx={{ 
+              display: 'flex', 
+              flexDirection: 'column',
+              height: '100%',
+              borderRadius: 4,
+              transition: 'transform 0.3s, box-shadow 0.3s',
+              '&:hover': {
+                transform: 'translateY(-10px)',
+                boxShadow: '0 10px 20px rgba(25, 118, 210, 0.2)'
+              },
+              backgroundColor: 'white',
+              border: '1px solid #e0e0e0',
+              position: 'relative'
+            }}>
+              <CardMedia
+                component="img"
+                height="220"
+                image={PesasCadaDia}
+                alt="Pesas cada día"
+                sx={{
+                  objectFit: 'cover',
+                  position: 'relative'
+                }}
+              />
 
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Typography variant="h5" component="div">
+              <CardContent sx={{ 
+                flexGrow: 1,
+                position: 'relative',
+                zIndex: 2
+              }}>
+                <Typography variant="h4" component="div" sx={{
+                  fontWeight: 'bold',
+                  mb: 2,
+                  color: '#1976d2',
+                  textTransform: 'uppercase'
+                }}>
                   {plan.name}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                
+                <Typography variant="body1" sx={{ 
+                  color: '#666666',
+                  minHeight: 80,
+                  mb: 3
+                }}>
                   {plan.description || 'Descripción del plan'}
                 </Typography>
 
                 {plan.discount ? (
-                  <>
-                    <Typography
-                      variant="h6"
-                      sx={{ mt: 2, textDecoration: 'line-through', color: 'gray' }}
-                    >
-                      Precio Normal: ${plan.price}
-                    </Typography>
-                    <Typography
-                      variant="h5"
-                      sx={{ color: 'red', fontWeight: 'bold' }}
-                    >
-                      Precio con Descuento: ${ plan.price - plan.price * (plan.discount / 100) }
-                    </Typography>
-                    <Typography variant="body1" color="error" sx={{ fontStyle: 'italic' }}>
-                      Descuento: {plan.discount}%
-                      {plan.discountReason && ` — ${plan.discountReason}`}
-                    </Typography>
-                  </>
+                  <Box sx={{ 
+                    background: 'rgba(255, 50, 50, 0.1)',
+                    p: 2,
+                    borderRadius: 2,
+                    position: 'relative',
+                    overflow: 'hidden',
+                    border: '1px solid #ff4444'
+                  }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box>
+                        <Typography variant="h6" sx={{ 
+                          textDecoration: 'line-through',
+                          color: '#ff4444'
+                        }}>
+                          ${plan.price}
+                        </Typography>
+                        <Typography variant="h4" sx={{
+                          color: '#1976d2',
+                          fontWeight: 'bold',
+                          lineHeight: 1
+                        }}>
+                          ${plan.price - plan.price * (plan.discount / 100)}
+                        </Typography>
+                      </Box>
+                      <Box sx={{
+                        background: '#ff4444',
+                        color: 'white',
+                        px: 2,
+                        py: 1,
+                        borderRadius: 2,
+                        textAlign: 'center'
+                      }}>
+                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                          -{plan.discount}%
+                        </Typography>
+                        <Typography variant="caption">
+                          {plan.discountReason}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
                 ) : (
-                  <Typography variant="h6" sx={{ mt: 2 }}>
-                    Precio: ${plan.price}
+                  <Typography variant="h4" sx={{ 
+                    fontWeight: 'bold',
+                    color: '#1976d2',
+                    textAlign: 'center'
+                  }}>
+                    ${plan.price}
                   </Typography>
                 )}
               </CardContent>
 
-              <CardActions
+              <CardActions sx={{
+                flexDirection: 'column',
+                gap: 2,
+                p: 3,
+                position: 'relative',
+                zIndex: 2
+              }}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={() => handleSubscribe(plan.id)}
                   sx={{
-                    flexDirection: 'column',
-                    alignItems: 'center', // Asegura que los elementos estén centrados horizontalmente
-                    justifyContent: 'center', // Opcional, asegura una mejor alineación vertical
-                    gap: 1, // Espaciado uniforme entre los botones
+                    background: 'linear-gradient(45deg, #1976d2 0%, #1565c0 100%)',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    py: 1.5,
+                    '&:hover': {
+                      transform: 'scale(1.02)',
+                      boxShadow: '0 5px 15px rgba(25, 118, 210, 0.4)'
+                    },
+                    transition: 'transform 0.3s, box-shadow 0.3s'
                   }}
                 >
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    onClick={() => handleSubscribe(plan.id)}
-                  >
-                    Comprar solo el Plan
-                  </Button>
+                  Comprar Plan
+                </Button>
 
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    fullWidth
-                    onClick={() => handlePlanPlusTrainer(plan.id)}
-                  >
-                    Comprar Plan + Personal Trainer
-                  </Button>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={() => handlePlanPlusTrainer(plan.id)}
+                  sx={{
+                    borderColor: '#1976d2',
+                    color: '#1976d2',
+                    fontWeight: 'bold',
+                    py: 1.5,
+                    '&:hover': {
+                      backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                      borderWidth: 2
+                    }
+                  }}
+                >
+                  + Personal Trainer
+                </Button>
 
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      textAlign: 'center',
-                      mt: 1,
-                    }}
-                  >
-                    *El precio final varía según la tarifa del entrenador
-                  </Typography>
-                </CardActions>
-
+                <Typography variant="caption" sx={{
+                  color: '#666666',
+                  textAlign: 'center',
+                  mt: 1
+                }}>
+                  *Tarifa variable según entrenador
+                </Typography>
+              </CardActions>
             </Card>
           </Grid>
         ))}
       </Grid>
 
-      <Box sx={{ marginTop: 4, textAlign: 'center' }}>
-        <Typography variant="h5">¿Quieres solo un entrenador personal?</Typography>
-        <Button variant="contained" color="primary" onClick={handleOnlyTrainer}>
-          Contratar Sólo Personal Trainer
+      <Box sx={{ 
+        marginTop: 8,
+        textAlign: 'center',
+        borderTop: '2px solid #e0e0e0',
+        pt: 6
+      }}>
+        <Typography variant="h4" sx={{ 
+          mb: 4,
+          fontWeight: 'bold',
+          color: '#1976d2'
+        }}>
+          ¿Solo necesitas un entrenador?
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={handleOnlyTrainer}
+          sx={{
+            background: 'linear-gradient(45deg, #1976d2 0%, #1565c0 100%)',
+            color: 'white',
+            fontWeight: 'bold',
+            px: 6,
+            py: 2,
+            fontSize: '1.1rem',
+            '&:hover': {
+              transform: 'scale(1.05)',
+              boxShadow: '0 5px 20px rgba(25, 118, 210, 0.4)'
+            },
+            transition: 'transform 0.3s, box-shadow 0.3s'
+          }}
+        >
+          Contratar Entrenador Personal
         </Button>
       </Box>
     </Box>

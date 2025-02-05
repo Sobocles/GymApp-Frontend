@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
 import {
   Container,
   Typography,
@@ -22,9 +23,10 @@ interface IPlan {
   price: number;
   description?: string;
   discount?: number;
-  discountReason?: string; // <-- nuevo
+  discountReason?: string; 
   versionNumber?: number;
   active?: boolean;
+  durationMonths?: number; 
 }
 
 const AdminPlanCrudPage: React.FC = () => {
@@ -42,14 +44,15 @@ const AdminPlanCrudPage: React.FC = () => {
     price: 0,
     description: '',
     discount: 0,
-    discountReason: '' // <-- nuevo
+    discountReason: '',
+    durationMonths: 1 
   });
 
   const fetchPlans = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiClient.get('/plans'); // Ajusta la ruta si es distinta
+      const response = await apiClient.get('/plans'); 
       setPlans(response.data);
     } catch (err: any) {
       console.error('Error al obtener planes:', err);
@@ -93,7 +96,11 @@ const AdminPlanCrudPage: React.FC = () => {
         fetchPlans();
       } catch (err) {
         console.error('Error al crear plan:', err);
-        alert('Ocurrió un error al crear el plan.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Ocurrió un error al crear el plan.',
+        });
       }
     } else if (dialogMode === 'edit' && selectedPlanId) {
       try {
@@ -102,21 +109,43 @@ const AdminPlanCrudPage: React.FC = () => {
         fetchPlans();
       } catch (err) {
         console.error('Error al actualizar plan:', err);
-        alert('Ocurrió un error al actualizar el plan.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Ocurrió un error al actualizar el plan.',
+        });
       }
     }
   };
 
+
   const handleArchive = async (id: number) => {
-    if (!window.confirm('¿Estás seguro de archivar (desactivar) este plan?')) return;
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: "¿Quieres archivar (desactivar) este plan?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, archivar!',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!result.isConfirmed) return;
+    
     try {
       await apiClient.delete(`/plans/${id}`);
       fetchPlans();
     } catch (err) {
       console.error('Error al archivar el plan:', err);
-      alert('No se pudo archivar el plan.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo archivar el plan.',
+      });
     }
   };
+
 
   return (
     <Container maxWidth="lg">
@@ -202,6 +231,16 @@ const AdminPlanCrudPage: React.FC = () => {
             value={planData.price}
             onChange={(e) => setPlanData({ ...planData, price: Number(e.target.value) })}
           />
+          <TextField
+              label="Duración (meses)"
+              type="number"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={planData.durationMonths}
+              onChange={(e) => setPlanData({ ...planData, durationMonths: Number(e.target.value) })}
+              inputProps={{ min: 1 }}
+            />
           <TextField
             label="Descripción"
             variant="outlined"

@@ -13,7 +13,8 @@ import MedicalInformationIcon from '@mui/icons-material/MedicalInformation';
 import MeasurementsIcon from '@mui/icons-material/FitnessCenter';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AssignmentIcon from '@mui/icons-material/Assignment';
-import ReceiptIcon from '@mui/icons-material/Receipt';
+import InfoIcon from '@mui/icons-material/Info';
+
 
 export interface MenuItem {
   label: string;
@@ -48,13 +49,13 @@ export const menuItems: MenuItem[] = [
   },
   {
     label: 'Usuarios',
-    path: '/admin/users',
+    path: '/admin/users/page/0',
     icon: PeopleIcon,
     roles: ['ROLE_ADMIN'],
   },
   {
     label: 'Dashboard Trainer',
-    path: '/trainers',
+    path: '/trainers/dashboard',
     icon: DashboardIcon,
     roles: ['ROLE_TRAINER'],
   },
@@ -133,7 +134,7 @@ export const menuItems: MenuItem[] = [
   },
   {
     label: 'Agregar Medición',
-    path: '/trainers/clients/1/measurements/add',
+    path: '/trainers/clients/:clientId/measurements/add',
     icon: MedicalInformationIcon,
     roles: ['ROLE_TRAINER'],
   },
@@ -208,5 +209,12 @@ export const menuItems: MenuItem[] = [
         roles: ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TRAINER'],
       },
     ],
+  },
+
+  {
+    label: 'Gym Info',
+    path: '/admin/gym-info',
+    icon: InfoIcon,
+    roles: ['ROLE_ADMIN'],
   },
 ];

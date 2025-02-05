@@ -2,9 +2,11 @@
 
 import apiClient from "../../Apis/apiConfig";
 import { AxiosResponse } from "axios";
-import { PaymentPlanDTO } from "./FinancialService";
+// import { PaymentPlanDTO } from "./FinancialService";
+import { PaymentPlanDTO, PaymentProductDTO  }from "../../Store/interface/Payment"
 
 // Define la interfaz de un PaymentProductDTO
+/*
 export interface PaymentProductDTO {
   paymentId: number;
   username: string;
@@ -12,7 +14,7 @@ export interface PaymentProductDTO {
   paymentDate: string;  // o Date
   transactionAmount: number;
   productName: string;
-}
+} */
 
 // Define la interfaz de la estructura paginada que retorna el backend
 export interface FacturasPage {
@@ -31,6 +33,7 @@ export interface PlanesPage {
   last: boolean;
 }
 
+/*
 export interface PaymentPlanDTO {
   paymentId: number;
   planId: number;
@@ -44,24 +47,25 @@ export interface PaymentPlanDTO {
   trainerSubscriptionStartDate: string; 
   trainerSubscriptionEndDate: string;
   personalTrainerName: string;
-}
+} */
 
-// Llamar al endpoint /payment/approved_products/page/{page}?size={size}
-export const getFacturasPage = async (
-  page: number,
-  size = 6
-): Promise<AxiosResponse<FacturasPage>> => {
-  return apiClient.get(`/payment/approved_products/page/${page}`, {
-    params: { size },
-  });
-};
+  export const getFacturasPage = async (
+    page: number,
+    size = 6,
+    search = ""
+  ): Promise<AxiosResponse<FacturasPage>> => {
+    return apiClient.get(`/payment/approved_products/page/${page}`, {
+      params: { size, search },
+    });
+  };
+  
 
-// Llamada GET /payment/approved_plans/page/{page}?size={size}
-export const getPlanesPage = async (
-  page: number,
-  size = 6
-): Promise<AxiosResponse<PlanesPage>> => {
-  return apiClient.get(`/payment/approved_plans/page/${page}`, {
-    params: { size },
-  });
-};
+  export const getPlanesPage = async (
+    page: number,
+    size = 6,
+    search = ""
+  ): Promise<AxiosResponse<PlanesPage>> => {
+    return apiClient.get(`/payment/approved_plans/page/${page}`, {
+      params: { size, search }, // Agregamos el parámetro de búsqueda
+    });
+  };

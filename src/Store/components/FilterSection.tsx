@@ -7,6 +7,7 @@ import {
   FormControlLabel,
   Checkbox,
   Box,
+  styled
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
@@ -23,6 +24,35 @@ interface FilterSectionProps {
   brands: string[]; 
   flavors: string[];              // <-- Ahora recibimos flavors dinámicos
 }
+
+const StyledAccordion = styled(Accordion)({
+  backgroundColor: '#1976d2',
+  color: 'white',
+  margin: '8px 0',
+  borderRadius: '8px',
+  '&:before': {
+    display: 'none',
+  },
+  '&.Mui-expanded': {
+    margin: '8px 0',
+  },
+});
+
+const StyledAccordionSummary = styled(AccordionSummary)({
+  '& .MuiAccordionSummary-expandIconWrapper': {
+    color: 'white',
+  },
+  '&:hover': {
+    backgroundColor: '#1565c0',
+  },
+});
+
+const StyledCheckbox = styled(Checkbox)({
+  color: 'white !important',
+  '&.Mui-checked': {
+    color: '#ff4081 !important',
+  },
+});
 
 const FilterSection: React.FC<FilterSectionProps> = ({
   checkBoxInStock,
@@ -52,61 +82,66 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   };
 
   return (
-    <Box display="flex" flexDirection="column" gap={2}>
-      <Typography variant="h6" gutterBottom>
+    <Box display="flex" flexDirection="column" gap={1} sx={{ p: 2 }}>
+      <Typography variant="h6" gutterBottom sx={{ 
+        color: '#1976d2',
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        letterSpacing: '1px'
+      }}>
         Filtros
       </Typography>
 
       {/* Disponibilidad */}
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>Disponibilidad</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box display="flex" flexDirection="column">
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="inStock"
-                  checked={checkBoxInStock}
-                  onChange={handleInStockChange}
-                />
-              }
-              label="En existencia"
-            />
-          </Box>
+      <StyledAccordion>
+        <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography sx={{ fontWeight: 500 }}>Disponibilidad</Typography>
+        </StyledAccordionSummary>
+        <AccordionDetails sx={{ bgcolor: '#f5f5f5' }}>
+          <FormControlLabel
+            control={
+              <StyledCheckbox
+                name="inStock"
+                checked={checkBoxInStock}
+                onChange={handleInStockChange}
+              />
+            }
+            label="En existencia"
+            sx={{ color: '#1976d2' }}
+          />
         </AccordionDetails>
-      </Accordion>
+      </StyledAccordion>
 
       {/* Marcas */}
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>Marca</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      <StyledAccordion>
+        <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography sx={{ fontWeight: 500 }}>Marca</Typography>
+        </StyledAccordionSummary>
+        <AccordionDetails sx={{ bgcolor: '#f5f5f5' }}>
           {brands.map((brand) => (
             <FormControlLabel
               key={brand}
               control={
-                <Checkbox
+                <StyledCheckbox
                   checked={selectedBrands.includes(brand)}
                   onChange={() => handleBrandToggle(brand)}
                 />
               }
               label={brand}
+              sx={{ color: '#1976d2', width: '100%', m: 0 }}
             />
           ))}
         </AccordionDetails>
-      </Accordion>
+      </StyledAccordion>
 
-      {/* Sabores (Dinámicos) */}
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>Sabor</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      {/* Sabores */}
+      <StyledAccordion>
+        <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography sx={{ fontWeight: 500 }}>Sabor</Typography>
+        </StyledAccordionSummary>
+        <AccordionDetails sx={{ bgcolor: '#f5f5f5' }}>
           {flavors.length === 0 ? (
-            <Typography variant="body2">
+            <Typography variant="body2" sx={{ color: '#1976d2' }}>
               No hay sabores registrados.
             </Typography>
           ) : (
@@ -114,17 +149,18 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               <FormControlLabel
                 key={flavor}
                 control={
-                  <Checkbox
+                  <StyledCheckbox
                     checked={selectedFlavors.includes(flavor)}
                     onChange={() => handleFlavorToggle(flavor)}
                   />
                 }
                 label={flavor}
+                sx={{ color: '#1976d2', width: '100%', m: 0 }}
               />
             ))
           )}
         </AccordionDetails>
-      </Accordion>
+      </StyledAccordion>
     </Box>
   );
 };

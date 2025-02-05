@@ -60,7 +60,7 @@ export const Paginator = ({ url, paginator, sortBy }: PaginatorProps) => {
           >
             <Link
               className="page-link"
-              to={`${url}/page/${pageIndex}?sortBy=${sortBy}`}>
+              to={`${url}/page/${pageIndex}${sortBy ? `?sortBy=${sortBy}` : ''}`} >
         
               {pageIndex + 1}
             </Link>

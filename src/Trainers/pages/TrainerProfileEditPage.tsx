@@ -15,10 +15,13 @@ import * as Yup from 'yup';
 import Swal from 'sweetalert2';
 import { useDispatch } from 'react-redux';
 import { updateProfile } from '../../Auth/store/auth/authSlice';
+import { useNavigate } from 'react-router-dom';
+
 
 export const TrainerProfileEditPage: React.FC = () => {
   const { login } = useAuth();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.log('Login User:', login.user);
@@ -31,7 +34,7 @@ export const TrainerProfileEditPage: React.FC = () => {
       .required('El correo es requerido'),
     password: Yup.string()
       .min(6, 'La contraseña debe tener al menos 6 caracteres')
-      .notRequired(),
+      .required('La contraseña es obligatoria'),
     file: Yup.mixed().notRequired(),
     instagramUrl: Yup.string().notRequired(),
     whatsappNumber: Yup.string().notRequired(),
@@ -43,11 +46,13 @@ export const TrainerProfileEditPage: React.FC = () => {
     email: login.user?.email || '',
     password: '',
     file: null as File | null,
-    instagramUrl: login.user?.trainerInfo?.instagramUrl || '',
-    whatsappNumber: login.user?.trainerInfo?.whatsappNumber || '',
+
   };
 
   const handleSubmit = async (
+
+
+      
     values: typeof initialValues,
     { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
   ) => {
@@ -62,7 +67,10 @@ export const TrainerProfileEditPage: React.FC = () => {
     }
     try {
       const updatedUser = await updateTrainerProfile(formData);
-      console.log('Perfil actualizado:', updatedUser);
+      console.log("aqui esta el usuario/trainer actualizado",updatedUser);
+  
+
+      
       dispatch(updateProfile(updatedUser));
       Swal.fire({
         icon: 'success',
@@ -209,3 +217,4 @@ export const TrainerProfileEditPage: React.FC = () => {
     </Box>
   );
 };
+export default TrainerProfileEditPage; 

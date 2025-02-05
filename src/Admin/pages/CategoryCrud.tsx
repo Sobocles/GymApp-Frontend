@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import apiClient from '../../Apis/apiConfig';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-
+import Swal from 'sweetalert2';
 // Importaciones de Material UI
 import {
   Typography,
@@ -49,15 +49,35 @@ export const CategoryCrud: React.FC = () => {
     }
   };
 
-  // Eliminar categoría
   const handleDelete = async (categoryId: number) => {
-    try {
-      await apiClient.delete(`/store/categories/${categoryId}`);
-      fetchCategories();
-      alert('Categoría eliminada correctamente');
-    } catch (error) {
-      console.error('Error al eliminar categoría:', error);
-      alert('Ocurrió un error al eliminar la categoría');
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: "¡Todos los productos de esta categoría serán desactivados!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await apiClient.delete(`/store/categories/${categoryId}`);
+        await fetchCategories();
+        Swal.fire(
+          '¡Eliminada!',
+          'La categoría y sus productos han sido desactivados.',
+          'success'
+        );
+      } catch (error) {
+        console.error('Error al eliminar categoría:', error);
+        Swal.fire(
+          'Error',
+          'Ocurrió un error al eliminar la categoría',
+          'error'
+        );
+      }
     }
   };
 
@@ -88,28 +108,34 @@ export const CategoryCrud: React.FC = () => {
   const handleSubmit = async (values: any, { resetForm }: any) => {
     try {
       if (selectedCategory) {
-        // PUT /store/categories/{id}?newName=XXXX
         await apiClient.put(`/store/categories/${selectedCategory.id}`, null, {
           params: { newName: values.name },
         });
-        alert('Categoría actualizada con éxito');
       } else {
-        // POST /store/categories?name=XXXX
         await apiClient.post('/store/categories', null, {
           params: { name: values.name },
         });
-        alert('Categoría creada con éxito');
       }
 
-      // Refrescar la lista
-      fetchCategories();
-      // Resetear formulario
+      await fetchCategories();
+      
+      Swal.fire({
+        icon: 'success',
+        title: selectedCategory ? '¡Actualizada!' : '¡Creada!',
+        text: selectedCategory 
+          ? 'La categoría ha sido actualizada correctamente.' 
+          : 'La categoría ha sido creada correctamente.',
+      });
+
       resetForm();
-      // Cerrar modal
       handleCloseDialog();
     } catch (error) {
       console.error('Error al guardar categoría:', error);
-      alert('Ocurrió un error al guardar la categoría');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Ocurrió un error al procesar la solicitud',
+      });
     }
   };
 
@@ -227,3 +253,5 @@ export const CategoryCrud: React.FC = () => {
     </Box>
   );
 };
+
+export default CategoryCrud;

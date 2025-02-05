@@ -1,6 +1,6 @@
 // src/components/layout/MainLayout.tsx
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
@@ -10,6 +10,7 @@ import Footer from './Footer/Footer';
 import Sidebar from './SideBar/SideBar';
 import { PROTECTED_PATHS } from '../../config/protectedPaths';
 import Carousel from '../common/Carousel';
+import LoadingSpinner from '../LoadingSpinner';
 
 const MainLayout = () => {
   console.log('MainLayout montado');
@@ -42,20 +43,18 @@ const MainLayout = () => {
   return (
     <>
       <Header />
-
-      {/* Mostramos el carrusel solo si es la página de inicio */}
       {isHomePage && <Carousel />}
-
+      
       <div style={{ display: 'flex', minHeight: '80vh' }}>
         {canSeeSidebar && <Sidebar />}
-
-        {/* Si es home => padding=0; caso contrario => padding='1rem' */}
+        
         <div style={{ flex: 1, padding: isHomePage ? 0 : '1rem' }}>
-          <Outlet />
+          <Suspense fallback={<LoadingSpinner />}>
+            <Outlet />
+          </Suspense>
         </div>
       </div>
 
-      {/* MOSTRAR FOOTER SOLO SI NO ES RUTA PROTEGIDA */}
       {!isProtectedRoute && <Footer />}
     </>
   );

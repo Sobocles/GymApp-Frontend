@@ -38,7 +38,7 @@ const publicNavItems = [
 
 function getDashboardPath(roles: string[]): string {
   if (roles.includes('ROLE_ADMIN')) return '/admin/dashboard';
-  if (roles.includes('ROLE_TRAINER')) return '/trainers';
+  if (roles.includes('ROLE_TRAINER')) return '/trainers/dashboard';
   // Por defecto, un user normal
   return '/dashboard';
 }

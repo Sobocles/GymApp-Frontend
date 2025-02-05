@@ -1,22 +1,6 @@
 // src/Store/slices/cartSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-// Tipo base de producto (según tu backend)
-export interface Product {
-  id: number;
-  name: string;
-  description?: string;
-  imageUrl?: string;
-  price: number;
-  discountPercent: number;
-  discountReason: string;
-  discountStart?: string; // Agregar si es necesario
-  discountEnd?: string;   // Agregar si es necesario
-  category: {
-    id: number;
-    name: string;
-  };
-}
+import { Product } from '../../interface/Product';
 
 // Estructura para guardar producto + cantidad
 export interface CartItem {

@@ -56,7 +56,7 @@ export const authSlice = createSlice({
         state.user = payload;
         state.isAdmin = payload.admin;
         state.trainer = payload.trainer;
-        state.roles = payload.roles ? payload.roles.map(role => role.authority) : [];
+        state.roles = payload.roles || [];
       } else {
         // Asegura que cualquier actualización de trainer se refleje
         state.user = payload;

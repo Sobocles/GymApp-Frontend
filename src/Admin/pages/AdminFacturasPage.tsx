@@ -27,26 +27,15 @@ const AdminFacturasPage: React.FC = () => {
   const { page: pageParam } = useParams();
   const currentPage = parseInt(pageParam ?? "0", 10);
 
+    // Hook de búsqueda reutilizable
+    const { searchTerm, setSearchTerm } = useSearch();
+
   // Usa el hook para cargar facturas (paginadas)
-  const { facturas, paginator, isLoading, error } = useFacturas(currentPage);
+  const { facturas, paginator, isLoading, error } = useFacturas(currentPage, searchTerm);
 
-  // Hook de búsqueda reutilizable
-  const { searchTerm, setSearchTerm } = useSearch();
 
-  // Filtrado en memoria si hay un término de búsqueda
-  const filteredFacturas = !searchTerm
-    ? facturas
-    : facturas.filter((factura) => {
-        // Ejemplo: filtramos por ID de pago, username, método de pago, producto, etc.
-        return (
-          factura.paymentId.toString().includes(searchTerm) ||
-          factura.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (factura.productName &&
-            factura.productName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-          (factura.paymentMethod &&
-            factura.paymentMethod.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
-      });
+
+
 
   if (isLoading) {
     return (
@@ -80,51 +69,48 @@ const AdminFacturasPage: React.FC = () => {
         onChange={setSearchTerm}
       />
 
-      {filteredFacturas.length === 0 ? (
-        <Typography variant="h6" sx={{ mt: 2 }}>
-          {searchTerm
-            ? "No se encontraron resultados para tu búsqueda."
-            : "No hay facturas disponibles."}
-        </Typography>
-      ) : (
-        <TableContainer component={Paper} sx={{ mt: 2 }}>
-          <Table aria-label="facturas de productos">
-            <TableHead>
-              <TableRow>
-                <TableCell>ID del Pago</TableCell>
-                <TableCell>Usuario</TableCell>
-                <TableCell>Método de Pago</TableCell>
-                <TableCell>Fecha de Pago</TableCell>
-                <TableCell>Monto</TableCell>
-                <TableCell>Producto</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredFacturas.map((payment) => (
-                <TableRow key={payment.paymentId}>
-                  <TableCell>{payment.paymentId}</TableCell>
-                  <TableCell>{payment.username}</TableCell>
-                  <TableCell>{payment.paymentMethod}</TableCell>
-                  <TableCell>
-                    {new Date(payment.paymentDate).toLocaleString("es-ES", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </TableCell>
-                  <TableCell>
-                    ${payment.transactionAmount.toFixed(2)}
-                  </TableCell>
-                  <TableCell>{payment.productName}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
-
+{facturas.length === 0 ? (
+  <Typography variant="h6" sx={{ mt: 2 }}>
+    {searchTerm
+      ? "No se encontraron resultados para tu búsqueda."
+      : "No hay facturas disponibles."}
+  </Typography>
+) : (
+  <TableContainer component={Paper} sx={{ mt: 2 }}>
+    <Table aria-label="facturas de productos">
+      <TableHead>
+        <TableRow>
+          <TableCell>ID del Pago</TableCell>
+          <TableCell>Usuario</TableCell>
+          <TableCell>Método de Pago</TableCell>
+          <TableCell>Fecha de Pago</TableCell>
+          <TableCell>Monto</TableCell>
+          <TableCell>Producto</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {facturas.map((payment) => (
+          <TableRow key={payment.paymentId}>
+            <TableCell>{payment.paymentId}</TableCell>
+            <TableCell>{payment.username}</TableCell>
+            <TableCell>{payment.paymentMethod}</TableCell>
+            <TableCell>
+              {new Date(payment.paymentDate).toLocaleString("es-ES", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </TableCell>
+            <TableCell>${payment.transactionAmount.toFixed(2)}</TableCell>
+            <TableCell>{payment.productName}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </TableContainer>
+)}
       {/* 
         Mostrar paginador SOLAMENTE si NO hay término de búsqueda
         y si hay más de una página en total

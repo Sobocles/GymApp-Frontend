@@ -16,6 +16,6 @@ export const PROTECTED_PATHS = [
   '/admin/store/categories',
   '/admin/plans',
   '/admin/planes',
-  '/admin/facturas'
-  
+  '/admin/facturas',
+  '/admin/gym-info',
 ];

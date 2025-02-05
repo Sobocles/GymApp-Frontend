@@ -18,21 +18,10 @@ import planImg from '../../../../GestorGymPro/src/assets/t600x362.jpg';
 import renuevaImg from '../../../../GestorGymPro/src/assets/smart-fit.jpg';
 import semaforoImg from '../../../../GestorGymPro/src/assets/entrenador-personal-madrid.jpg';
 import gratisImg from '../../../../GestorGymPro/src/assets/reserva.png';
-
+import { Product } from '../../Store/interface/Product';
 // Importamos la función que obtiene los productos en oferta
 import { getDiscountedProducts } from '../../services/DiscountedProductsService';
 
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  discountPercent: number;
-  discountReason: string;
-  discountStart?: string;
-  discountEnd?: string;
-}
 
 // Función auxiliar para calcular precio final y descuento
 function getDiscountedPrice(product: Product) {

@@ -22,9 +22,6 @@ export const UserForm = ({ userSelected, handlerAddUser, handlerCloseForm }: Use
     email: Yup.string()
       .email('Debe ser un email válido')
       .required('El email es obligatorio'),
-    password: !userSelected.id
-      ? Yup.string().required('La contraseña es obligatoria')
-      : Yup.string(),
     admin: Yup.boolean(),
     trainer: Yup.boolean(),
     // Campos adicionales para Trainer
@@ -85,19 +82,7 @@ export const UserForm = ({ userSelected, handlerAddUser, handlerCloseForm }: Use
         helperText={formik.touched.username && formik.errors.username}
       />
 
-      {!formik.values.id && (
-        <TextField
-          fullWidth
-          margin="normal"
-          label="Contraseña"
-          type="password"
-          name="password"
-          value={formik.values.password}
-          onChange={formik.handleChange}
-          error={formik.touched.password && Boolean(formik.errors.password)}
-          helperText={formik.touched.password && formik.errors.password}
-        />
-      )}
+
 
       <TextField
         fullWidth

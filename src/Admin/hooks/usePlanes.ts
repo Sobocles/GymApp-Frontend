@@ -9,7 +9,7 @@ interface PaginatorState {
   last: boolean;
 }
 
-export const usePlanes = (currentPage: number) => {
+export const usePlanes = (currentPage: number, searchTerm: string) => {
   const [planes, setPlanes] = useState<PaymentPlanDTO[]>([]);
   const [paginator, setPaginator] = useState<PaginatorState>({
     number: 0,
@@ -20,12 +20,13 @@ export const usePlanes = (currentPage: number) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPlanesPage = async (page: number) => {
+  const fetchPlanesPage = async (page: number, search: string) => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const response = await getPlanesPage(page, 6); // 6 por página
+      // Asumiendo que getPlanesPage acepta un tercer parámetro para búsqueda
+      const response = await getPlanesPage(page, 6, search);
       const data: PlanesPage = response.data;
       setPlanes(data.content);
       setPaginator({
@@ -43,8 +44,8 @@ export const usePlanes = (currentPage: number) => {
   };
 
   useEffect(() => {
-    fetchPlanesPage(currentPage);
-  }, [currentPage]);
+    fetchPlanesPage(currentPage, searchTerm);
+  }, [currentPage, searchTerm]);
 
   return {
     planes,

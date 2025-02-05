@@ -21,7 +21,7 @@ const validationSchema = Yup.object().shape({
   name: Yup.string().required('El nombre es requerido'),
   description: Yup.string()
     .required('La descripción es requerida')
-    .max(200, 'La descripción no puede tener más de 200 caracteres'),
+    .max(300, 'La descripción no puede tener más de 200 caracteres'),
   category: Yup.string().required('La categoría es requerida'),
   price: Yup.number().min(0, 'El precio debe ser mayor o igual a 0').required('El precio es requerido'),
   brand: Yup.string().required('La marca es requerida'),

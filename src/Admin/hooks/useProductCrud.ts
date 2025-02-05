@@ -51,7 +51,8 @@ export const useProductCrud = (currentPage: number, searchTerm: string) => {
   // Obtener productos paginados
   const fetchProductsPage = async () => {
     try {
-      const data = await getProductsPage(currentPage, 12);
+      const data = await getProductsPage(currentPage, 6);
+    
       setProducts(data.content);
       setPaginator({
         number: data.number,
@@ -107,6 +108,7 @@ export const useProductCrud = (currentPage: number, searchTerm: string) => {
 
   // Editar producto
   const handlerUpdateProduct = async (id: number, formData: FormData) => {
+    console.log("aqui la form data",formData);
     try {
       await updateProduct(id, formData);
       Swal.fire('Producto actualizado', 'El producto ha sido actualizado con éxito.', 'success');

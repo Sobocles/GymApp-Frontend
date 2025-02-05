@@ -35,4 +35,5 @@ export interface BodyMeasurement {
     idealMaxWeight: number | null;
     trainerRecommendations: string;
     age: number | null;
+    
 }

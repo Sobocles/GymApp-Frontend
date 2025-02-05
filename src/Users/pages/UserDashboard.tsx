@@ -61,7 +61,6 @@ export const UserDashboard: React.FC = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       if (!token) return;
-
       try {
         const config = {
           headers: {
@@ -74,7 +73,6 @@ export const UserDashboard: React.FC = () => {
         console.error('Error fetching dashboard data:', error);
       }
     };
-
     fetchDashboardData();
   }, [token]);
 
@@ -89,7 +87,6 @@ export const UserDashboard: React.FC = () => {
 
       {data && (
         <>
-          {/* Suscripciones y Pagos */}
           <Grid container spacing={3} sx={{ mt: 4 }}>
             {/* Suscripciones al Plan */}
             <Grid item xs={12} md={4}>
@@ -102,11 +99,22 @@ export const UserDashboard: React.FC = () => {
                 ) : (
                   data.planSubscriptions.map((sub) => (
                     <Box key={sub.id} sx={{ mb: 2 }}>
-                      <Typography variant="subtitle1">Plan: {sub.plan?.name}</Typography>
-                      <Typography>Precio: ${sub.plan?.price}</Typography>
-                      <Typography>Inicio: {sub.startDate}</Typography>
-                      <Typography>Fin: {sub.endDate}</Typography>
-                      <Typography>Activa: {sub.active ? 'Sí' : 'No'}</Typography>
+                      <Typography variant="subtitle1">
+                        Plan: {sub.plan?.name}
+                      </Typography>
+                      <Typography>
+                        Precio: ${sub.plan?.price}
+                      </Typography>
+                      <Typography>
+                        Inicio: {sub.startDate}
+                      </Typography>
+                      <Typography>
+                        Fin: {sub.endDate}
+                      </Typography>
+                      {/* Aplica el estilo condicional */}
+                      <Typography sx={{ color: sub.active ? 'green' : 'red' }}>
+                        {sub.active ? 'Vigente' : 'Terminado'}
+                      </Typography>
                     </Box>
                   ))
                 )}
@@ -127,11 +135,21 @@ export const UserDashboard: React.FC = () => {
                       <Typography variant="subtitle1">
                         Entrenador: {tsub.personalTrainer.user.username}
                       </Typography>
-                      <Typography>Especialidad: {tsub.personalTrainer.specialization}</Typography>
-                      <Typography>Mensualidad: ${tsub.personalTrainer.monthlyFee}</Typography>
-                      <Typography>Inicio: {tsub.startDate}</Typography>
-                      <Typography>Fin: {tsub.endDate}</Typography>
-                      <Typography>Activa: {tsub.active ? 'Sí' : 'No'}</Typography>
+                      <Typography>
+                        Especialidad: {tsub.personalTrainer.specialization}
+                      </Typography>
+                      <Typography>
+                        Mensualidad: ${tsub.personalTrainer.monthlyFee}
+                      </Typography>
+                      <Typography>
+                        Inicio: {tsub.startDate}
+                      </Typography>
+                      <Typography>
+                        Fin: {tsub.endDate}
+                      </Typography>
+                      <Typography sx={{ color: tsub.active ? 'green' : 'red' }}>
+                        {tsub.active ? 'Vigente' : 'Terminado'}
+                      </Typography>
                     </Box>
                   ))
                 )}

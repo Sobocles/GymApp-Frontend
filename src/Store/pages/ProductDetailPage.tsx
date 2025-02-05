@@ -1,21 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, IconButton } from '@mui/material';
+import { 
+  Box, 
+  Typography, 
+  Button, 
+  IconButton, 
+  Grid, 
+  Divider, 
+  Chip, 
+  Stack,
+  Skeleton,
+  useTheme,
+  useMediaQuery 
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import { getProductById, createProductPreference } from '../../Store/services/ProductService';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, increaseQuantity, decreaseQuantity, Product } from '../../Store/Store/slices/cartSlice';
 import { RootState } from '../../store';
+import Swal from 'sweetalert2';
 
-/**
- * Calcula la oferta de un producto si está en rango de fechas.
- * Retorna un objeto con:
- *   - originalPrice (number)
- *   - finalPrice (number)
- *   - isDiscountActive (boolean)
- *   - discountReason (string | null)
- */
 function getDiscountedPrice(product: Product) {
   const now = new Date();
   
@@ -53,26 +59,27 @@ const ProductDetailPage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [product, setProduct] = useState<Product | null>(null);
-
   const { items: cartItems } = useSelector((state: RootState) => state.cart);
   const { isAuth } = useSelector((state: RootState) => state.auth);
 
-  // Si el producto ya está en el carrito, obtenemos su cantidad
   const cartItem = cartItems.find(item => item.product.id === Number(id));
   const quantityInCart = cartItem ? cartItem.quantity : 0;
+
+  const [quantity, setQuantity] = useState(1); // Inicializar en 1
 
   useEffect(() => {
     const fetchProduct = async () => {
       const productId = parseInt(id || '', 10);
       if (isNaN(productId)) {
-        console.error('ID del producto no es válido:', id);
+        console.error('ID del producto no válido:', id);
         return;
       }
       try {
         const productData = await getProductById(productId);
-        console.log("AQUI productData",productData);
         setProduct(productData);
       } catch (error) {
         console.error('Error al obtener el producto:', error);
@@ -81,58 +88,45 @@ const ProductDetailPage: React.FC = () => {
     fetchProduct();
   }, [id]);
 
-  // Aumentar cantidad
   const handleIncrease = () => {
-    if (!cartItem && product) {
-      dispatch(addToCart({ product, quantity: 1 }));
-    } else if (cartItem) {
-      dispatch(increaseQuantity(cartItem.product.id));
-    }
+    setQuantity(prev => prev + 1);
   };
-
-  // Disminuir cantidad
+  
   const handleDecrease = () => {
-    if (cartItem && cartItem.quantity > 1) {
-      dispatch(decreaseQuantity(cartItem.product.id));
-    }
+    setQuantity(prev => Math.max(1, prev - 1)); // No permitir menos de 1
   };
 
-  // Agregar al Carrito
   const handleAddToCart = () => {
     if (product) {
-      dispatch(addToCart({ product, quantity: 1 }));
+      dispatch(addToCart({ product, quantity })); // Usar la cantidad local
     }
   };
 
-  // Comprar Ahora (redirige a MercadoPago)
   const handleBuyNow = async () => {
     if (!product) return;
 
-    // Verificar autenticación antes de proceder
     if (!isAuth) {
+      await Swal.fire({
+        title: 'Acceso requerido',
+        text: 'Debes iniciar sesión para realizar una compra. Serás redirigido al login.',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
       navigate('/auth/login', { state: { from: location.pathname } });
       return;
     }
 
-    // Calcular el precio final (con descuento si aplica)
     const { finalPrice } = getDiscountedPrice(product);
-
-    // El payload se enviará con 'unitPrice' = precio con descuento en caso de oferta
-    const payload = [
-      {
-        productId: product.id,    // O el ID real que corresponda
-        unitPrice: finalPrice,
-        quantity: 1,
-      },
-    ];
-    
+    const payload = [{
+      productId: product.id,
+      unitPrice: finalPrice,
+      quantity: quantity, // Usar cantidad local
+    }];
 
     try {
       const response = await createProductPreference(payload);
-      console.log("aqui response",response);
-      const { initPoint } = response;
-      if (initPoint) {
-        window.location.href = initPoint;
+      if (response.initPoint) {
+        window.location.href = response.initPoint;
       }
     } catch (error) {
       console.error('Error al procesar el pago:', error);
@@ -141,99 +135,213 @@ const ProductDetailPage: React.FC = () => {
   };
 
   if (!product) {
-    return <div>Cargando producto...</div>;
+    return (
+      <Box sx={{ p: 3 }}>
+        <Skeleton variant="rectangular" width="100%" height={400} />
+        <Box sx={{ mt: 2 }}>
+          <Skeleton width="60%" height={40} />
+          <Skeleton width="40%" height={30} />
+          <Skeleton width="30%" height={30} />
+        </Box>
+      </Box>
+    );
   }
 
-  // Aplicamos la lógica de descuento para renderizar
-  const {
-    originalPrice,
-    finalPrice,
-    isDiscountActive,
-    discountReason
-  } = getDiscountedPrice(product);
+  const { originalPrice, finalPrice, isDiscountActive, discountReason } = getDiscountedPrice(product);
 
   return (
-    <Box display="flex" flexDirection="column" padding={2}>
-      <Typography variant="h4" gutterBottom>
-        {product.name}
-      </Typography>
+    <Box sx={{ p: 3, maxWidth: 1200, margin: '0 auto' }}>
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={6}>
+          <Box sx={{
+            position: 'relative',
+            borderRadius: 2,
+            overflow: 'hidden',
+            bgcolor: 'background.paper',
+            boxShadow: 2,
+            padding: 2
+          }}>
+            {product.imageUrl && (
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  objectFit: 'contain',
+                  maxHeight: '500px'
+                }}
+              />
+            )}
+            {isDiscountActive && (
+              <Chip
+                label="¡Oferta!"
+                color="error"
+                icon={<LocalOfferIcon />}
+                sx={{
+                  position: 'absolute',
+                  top: 16,
+                  right: 16,
+                  fontSize: '1rem',
+                  padding: 1
+                }}
+              />
+            )}
+          </Box>
+        </Grid>
 
-      {product.imageUrl && (
-        <img
-          src={product.imageUrl}
-          alt={product.name}
-          style={{ width: '300px', marginBottom: '16px' }}
-        />
-      )}
-
-      <Typography variant="body1" gutterBottom>
-        {product.description || 'Sin descripción disponible.'}
-      </Typography>
-
-      {/* Si hay descuento vigente mostramos precio tachado y precio final */}
-      {isDiscountActive ? (
-        <Box marginY={2}>
-          <Typography
-            variant="body2"
-            sx={{ textDecoration: 'line-through', color: 'gray' }}
+        <Grid item xs={12} md={6}>
+          <Typography 
+            variant="h3" 
+            component="h1" 
+            gutterBottom
+            sx={{ 
+              fontWeight: 700,
+              color: theme.palette.text.primary
+            }}
           >
-            ${originalPrice.toFixed(2)}
+            {product.name}
           </Typography>
-          <Typography
-            variant="h6"
-            sx={{ color: 'red', fontWeight: 'bold' }}
+
+          <Typography 
+            variant="body1" 
+            paragraph
+            sx={{
+              fontSize: '1.1rem',
+              lineHeight: 1.6,
+              color: theme.palette.text.secondary,
+              mb: 4
+            }}
           >
-            ${finalPrice.toFixed(2)}
+            {product.description || 'Sin descripción disponible.'}
           </Typography>
-          {discountReason && (
-            <Typography
-              variant="body2"
-              sx={{ color: 'red', fontStyle: 'italic' }}
-            >
-              {discountReason}
+
+          <Box sx={{ mb: 4 }}>
+  {isDiscountActive ? (
+    <Stack direction="row" alignItems="center" spacing={2}>
+      <Typography
+        variant="h4"
+        sx={{
+          color: theme.palette.error.main,
+          fontWeight: 700
+        }}
+      >
+        ${finalPrice.toFixed(2)} c/u
+      </Typography>
+      <Typography
+        variant="h6"
+        sx={{
+          textDecoration: 'line-through',
+          color: theme.palette.text.disabled
+        }}
+      >
+        ${originalPrice.toFixed(2)}
+      </Typography>
+    </Stack>
+  ) : (
+    <Typography
+      variant="h4"
+      sx={{
+        fontWeight: 700,
+        color: theme.palette.text.primary
+      }}
+    >
+      ${originalPrice.toFixed(2)} c/u
+    </Typography>
+  )}
+  
+  {/* Agregar el total */}
+  <Typography variant="h6" sx={{ mt: 2 }}>
+    Total: ${(finalPrice * quantityInCart).toFixed(2)}
+  </Typography>
+
+  {discountReason && (
+    <Chip
+      label={discountReason}
+      color="info"
+      size="small"
+      sx={{ mt: 1, fontSize: '0.9rem' }}
+    />
+  )}
+</Box>
+
+          <Divider sx={{ my: 3 }} />
+
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              Cantidad:
             </Typography>
-          )}
-        </Box>
-      ) : (
-        <Typography variant="h6" gutterBottom>
-          Precio: ${originalPrice.toFixed(2)}
-        </Typography>
-      )}
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <IconButton 
+                onClick={handleDecrease} 
+                color="primary"
+                sx={{
+                  border: `1px solid ${theme.palette.primary.main}`,
+                  borderRadius: '8px'
+                }}
+              >
+                <RemoveIcon />
+              </IconButton>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  minWidth: '40px', 
+                  textAlign: 'center',
+                  fontWeight: 600
+                }}
+              >
+                {quantity} 
+              </Typography>
+              <IconButton 
+                onClick={handleIncrease} 
+                color="primary"
+                sx={{
+                  border: `1px solid ${theme.palette.primary.main}`,
+                  borderRadius: '8px'
+                }}
+              >
+                <AddIcon />
+              </IconButton>
+            </Stack>
+          </Box>
 
-      <Typography variant="body1">
-        Cantidad en el carrito: {quantityInCart}
-      </Typography>
-
-      <Box display="flex" alignItems="center" marginTop={2}>
-        <IconButton onClick={handleDecrease} color="primary">
-          <RemoveIcon />
-        </IconButton>
-        <Typography>{quantityInCart}</Typography>
-        <IconButton onClick={handleIncrease} color="primary">
-          <AddIcon />
-        </IconButton>
-      </Box>
-
-      <Box marginTop={2}>
-        {/* Comprar Ahora (Requiere autenticación) */}
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleBuyNow}
-          sx={{ mr: 2 }}
-        >
-          Comprar ahora
-        </Button>
-
-        {/* Agregar al Carrito */}
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={handleAddToCart}
-        >
-          Agregar al Carrito
-        </Button>
-      </Box>
+          <Stack 
+            direction={isMobile ? "column" : "row"} 
+            spacing={2} 
+            sx={{ mt: 4 }}
+          >
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleBuyNow}
+            size="large"
+            fullWidth
+            sx={{
+              py: 1.5,
+              fontSize: '1.1rem',
+              textTransform: 'none'
+            }}
+          >
+            Comprar ahora ({quantity} unidades)
+          </Button>
+            
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={handleAddToCart}
+              size="large"
+              fullWidth
+              sx={{
+                py: 1.5,
+                fontSize: '1.1rem',
+                textTransform: 'none'
+              }}
+            >
+              Añadir al carrito
+            </Button>
+          </Stack>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

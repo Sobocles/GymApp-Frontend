@@ -268,7 +268,7 @@ const StoreHomePage: React.FC = () => {
                         textDecoration: 'none',
                         color: 'inherit',
                         '&:hover': {
-                          textDecoration: 'line-through',
+                          textDecoration: 'underline',
                         },
                       }}
                     >

@@ -27,9 +27,14 @@ export interface UserInterface {
   admin: boolean;
   trainer?: boolean;
   role?: Role | string;
-  roles?: string[];
+  roles?: Role[];
   profileImageUrl?: string;
+  // Detalles específicos de entrenadores
   trainerDetails?: TrainerDetails;
+    /**
+   * Campo opcional para adjuntar un archivo de certificación (PDF, imagen, etc.)
+   * cuando se marca el usuario como Trainer.
+   */
     certificationFile?: File;
 }
 

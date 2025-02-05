@@ -147,6 +147,7 @@ export const createProduct = async (formData: FormData): Promise<Product> => {
   return response.data;
 };
 export const updateProduct = async (id: number, formData: FormData): Promise<Product> => {
+  console.log("aqui formData",formData);
   const response = await apiClient.put(`/store/products/${id}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });

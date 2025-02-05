@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { menuItems } from '../../../config/menuItems';
-import { getPrimaryRole } from '../../../Helpers/getPrimaryRole';
+
 
 // Ancho del drawer
 const drawerWidth = 300;
@@ -26,7 +26,9 @@ const Sidebar: React.FC = () => {
   
   // Rol principal del usuario (admin, trainer o user)
   const userRoles = login.roles || [];
-  const primaryRole = getPrimaryRole(userRoles);
+  // Si asumimos que userRoles siempre tendrá 1 rol, lo tomamos:
+  const userRole = userRoles.length > 0 ? userRoles[0] : 'ROLE_USER';
+
 
   // Estado para controlar qué submenú está abierto
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
@@ -62,7 +64,7 @@ const Sidebar: React.FC = () => {
 
       <List>
         {menuItems
-          .filter((item) => item.roles.includes(primaryRole))
+          .filter((item) => item.roles.includes(userRole))
           .map((item) => {
             // Si el item tiene subItems, renderizamos un menú colapsable
             if (item.subItems && item.subItems.length > 0) {

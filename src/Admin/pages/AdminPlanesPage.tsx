@@ -1,6 +1,6 @@
 // src/Admin/pages/AdminPlanesPage.tsx
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   TableContainer,
   Table,
@@ -10,9 +10,8 @@ import {
   TableBody,
   Paper,
   Typography,
-  CircularProgress,
   Alert,
-  Box,
+
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { usePlanes } from "../hooks/usePlanes";
@@ -23,42 +22,27 @@ import { useSearch } from "../hooks/useSearch";
 import SearchBar from "../../components/common/SearchBar";
 
 const AdminPlanesPage: React.FC = () => {
+ 
   // Obtenemos la página desde la URL
   const { page: pageParam } = useParams();
   const currentPage = parseInt(pageParam ?? "0", 10);
 
-  // Usamos el hook para traer los planes (paginados)
-  const { planes, paginator, isLoading, error } = usePlanes(currentPage);
+    // Hook de búsqueda reutilizable
+    const { searchTerm, setSearchTerm } = useSearch();
 
-  // Hook de búsqueda reutilizable
-  const { searchTerm, setSearchTerm } = useSearch();
 
-  // Filtrado en memoria si hay un término de búsqueda
-  // Puedes elegir los campos según necesites (paymentId, planId, username, etc.)
-  const filteredPlanes = !searchTerm
-    ? planes
-    : planes.filter((payment) => {
-        return (
-          payment.paymentId.toString().includes(searchTerm) ||
-          payment.planId.toString().includes(searchTerm) ||
-          payment.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (payment.personalTrainerName &&
-            payment.personalTrainerName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-          (payment.paymentMethod &&
-            payment.paymentMethod.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
-      });
 
-  if (isLoading) {
-    return (
-      <Box textAlign="center" mt={4}>
-        <CircularProgress />
-        <Typography variant="h6" mt={2}>
-          Cargando pagos aprobados de planes...
-        </Typography>
-      </Box>
+    const { planes, paginator, error } = usePlanes(
+      searchTerm ? 0 : currentPage, // Siempre usa página 0 para búsquedas
+      searchTerm
     );
-  }
+
+
+    const handleSearch = (term: string) => {
+      setSearchTerm(term);
+    };
+
+
 
   if (error) {
     return (
@@ -76,12 +60,12 @@ const AdminPlanesPage: React.FC = () => {
 
       {/* Barra de búsqueda */}
       <SearchBar
-        placeholder="Buscar por ID Pago, Usuario, Entrenador, etc."
+        placeholder="Buscar por usuario"
         value={searchTerm}
-        onChange={setSearchTerm}
+        onChange={handleSearch}
       />
 
-      {filteredPlanes.length === 0 ? (
+      {planes.length === 0 ? (
         <Typography variant="h6" sx={{ mt: 2 }}>
           {searchTerm
             ? "No se encontraron resultados para tu búsqueda."
@@ -106,7 +90,7 @@ const AdminPlanesPage: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredPlanes.map((payment) => (
+              {planes.map((payment) => (
                 <TableRow key={payment.paymentId}>
                   <TableCell>{payment.paymentId}</TableCell>
                   <TableCell>{payment.planId}</TableCell>
