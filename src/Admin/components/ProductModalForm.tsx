@@ -43,6 +43,9 @@ const validationSchema = Yup.object().shape({
     .required('El precio es requerido'),
   brand: Yup.string().required('La marca es requerida'),
   flavor: Yup.string().required('El sabor es requerido'),
+  stock: Yup.number()
+  .min(0, 'El stock debe ser mayor o igual a 0')
+  .required('El stock es requerido'),
 });
 
 export const ProductModalForm: React.FC<ProductModalFormProps> = ({

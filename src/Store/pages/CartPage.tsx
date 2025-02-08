@@ -13,10 +13,10 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { createProductPreference } from '../services/ProductService';
+import Swal from 'sweetalert2';
 
 /**
- * Duplicamos la misma lógica de getDiscountedPrice para cada producto
- * y poder mostrar su precio final y original en caso de descuento.
+ * Función auxiliar para calcular el precio con descuento.
  */
 function getDiscountedPrice(item: CartItem) {
   const { product } = item;
@@ -55,7 +55,7 @@ const CartPage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-
+  
   const { items } = useSelector((state: RootState) => state.cart);
   const { isAuth } = useSelector((state: RootState) => state.auth);
 
@@ -67,25 +67,23 @@ const CartPage: React.FC = () => {
     );
   }
 
-  // Calculamos el total (sumamos finalPrice * quantity)
+  // Calcular el total del carrito
   const totalPrice = items.reduce((acc, item) => {
     const { finalPrice } = getDiscountedPrice(item);
     return acc + finalPrice * item.quantity;
   }, 0);
 
   const handleCheckout = async () => {
-    // Verificar autenticación
     if (!isAuth) {
       navigate('/auth/login', { state: { from: location.pathname } });
       return;
     }
-
-    // Armar payload usando el precio con descuento en cada ítem
+    
     const payload = items.map(item => {
       const { finalPrice } = getDiscountedPrice(item);
       return {
         productId: item.product.id,
-        unitPrice: finalPrice,   // <--- Importante: mandar precio final
+        unitPrice: finalPrice,
         quantity: item.quantity,
       };
     });
@@ -93,9 +91,8 @@ const CartPage: React.FC = () => {
     try {
       const response = await createProductPreference(payload);
       const { initPoint } = response;
-
       if (initPoint) {
-        window.location.href = initPoint;  
+        window.location.href = initPoint;
       }
     } catch (error) {
       console.error('Error al procesar el checkout:', error);
@@ -110,8 +107,9 @@ const CartPage: React.FC = () => {
       </Typography>
 
       {items.map(item => {
-        // Calculamos su descuento
         const { originalPrice, finalPrice, isDiscountActive, discountReason } = getDiscountedPrice(item);
+        // Calculamos el stock disponible para este ítem
+        const availableStock = item.product.stock - item.quantity;
 
         return (
           <Box
@@ -135,6 +133,10 @@ const CartPage: React.FC = () => {
               />
               <Box>
                 <Typography variant="h6">{item.product.name}</Typography>
+                {/* Mostrar stock disponible */}
+                <Typography variant="body2">
+                  Stock disponible: {availableStock} {availableStock === 1 ? 'unidad' : 'unidades'}
+                </Typography>
                 
                 {isDiscountActive ? (
                   <Box>
@@ -167,7 +169,6 @@ const CartPage: React.FC = () => {
               </Box>
             </Box>
 
-            {/* Botones + y - */}
             <Box display="flex" alignItems="center">
               <IconButton
                 color="primary"
@@ -178,7 +179,19 @@ const CartPage: React.FC = () => {
               <Typography sx={{ mx: 1 }}>{item.quantity}</Typography>
               <IconButton
                 color="primary"
-                onClick={() => dispatch(increaseQuantity(item.product.id))}
+                // Deshabilitamos el botón si no hay stock disponible
+                onClick={() => {
+                  if (availableStock > 0) {
+                    dispatch(increaseQuantity(item.product.id));
+                  } else {
+                    Swal.fire({
+                      title: 'Sin stock',
+                      text: 'No hay unidades disponibles para agregar.',
+                      icon: 'error'
+                    });
+                  }
+                }}
+                disabled={availableStock <= 0}
               >
                 <AddIcon />
               </IconButton>

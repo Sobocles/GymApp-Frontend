@@ -20,6 +20,9 @@ import { Paginator } from '../../Admin/components/Paginator';
 import FilterSection from '../components/FilterSection';
 import { useProducts } from '../../Hooks/useProducts';
 import { addToCart } from '../../Store/Store/slices/cartSlice';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
+
 
 /**
  * Calcula el precio final con descuento si está en rango de fechas.
@@ -64,6 +67,7 @@ function getDiscountedPrice(product: Product) {
   };
 }
 
+
 const StoreHomePage: React.FC = () => {
   const { searchTerm, setSearchTerm } = useSearch();
   const location = useLocation();
@@ -75,6 +79,8 @@ const StoreHomePage: React.FC = () => {
   // Hook para despachar acciones
   const dispatch = useDispatch();
   const navigate = useNavigate(); // si quieres redirigir en algún momento
+
+  const cartItems = useSelector((state: RootState) => state.cart.items);
 
   const isSearching = searchTerm.trim() !== '';
 
@@ -113,18 +119,25 @@ const StoreHomePage: React.FC = () => {
   });
 
   // Al hacer clic en “Agregar al carrito”
-  const handleAddToCart = (product: Product) => {
-    // Agregamos con cantidad=1
-    dispatch(addToCart({ product, quantity: 1 }));
-    // Notificación de éxito (puedes usar la que desees)
-    Swal.fire({
-      title: '¡Agregado!',
-      text: `Has agregado "${product.name}" al carrito.`,
-      icon: 'success',
-      timer: 1500,
-      showConfirmButton: false,
-    });
+  const handleAddToCart = (product: Product, availableStock: number) => {
+    if (availableStock > 0) {
+      dispatch(addToCart({ product, quantity: 1 }));
+      Swal.fire({
+        title: '¡Agregado!',
+        text: `Has agregado "${product.name}" al carrito.`,
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } else {
+      Swal.fire({
+        title: 'Sin stock',
+        text: 'Lo sentimos, este producto se encuentra agotado.',
+        icon: 'error',
+      });
+    }
   };
+  
 
   return (
     <Box display="flex" padding={2}>
@@ -192,132 +205,138 @@ const StoreHomePage: React.FC = () => {
           <Typography variant="body1">No se encontraron productos.</Typography>
         ) : (
           <Grid container spacing={2}>
-            {finalProducts.map((product) => {
-              // Calculamos los datos de oferta
-              const {
-                originalPrice,
-                finalPrice,
-                isDiscountActive,
-                discountReason,
-              } = getDiscountedPrice(product);
+ {finalProducts.map((product) => {
+  // Calculamos los datos de descuento
+  const {
+    originalPrice,
+    finalPrice,
+    isDiscountActive,
+    discountReason,
+  } = getDiscountedPrice(product);
 
-              return (
-                <Grid item xs={12} sm={6} md={3} key={product.id}>
-                  {/* CARD de cada producto */}
-                  <Box
-                    sx={{
-                      border: '1px solid #ccc',
-                      borderRadius: '4px',
-                      padding: 2,
-                      textAlign: 'center',
-                      position: 'relative',
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    {/* Etiqueta de oferta en la esquina (opcional) */}
-                    {isDiscountActive && (
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          backgroundColor: 'red',
-                          color: 'white',
-                          padding: '4px 8px',
-                          borderRadius: '0 0 4px 0',
-                        }}
-                      >
-                        ¡Oferta!
-                      </Box>
-                    )}
+  // Obtenemos la cantidad que ya se agregó al carrito para este producto
+  const cartItem = cartItems.find(item => item.product.id === product.id);
+  const quantityInCart = cartItem ? cartItem.quantity : 0;
+  // Calculamos el stock disponible (stock original menos la cantidad en el carrito)
+  const availableStock = product.stock - quantityInCart;
 
-                    {/* Imagen */}
-                    {product.imageUrl && (
-                      <Box
-                        sx={{
-                          width: '100%',
-                          height: '180px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          overflow: 'hidden',
-                          marginBottom: '8px',
-                        }}
-                      >
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          style={{
-                            width: 'auto',
-                            height: '100%',
-                            objectFit: 'cover',
-                          }}
-                        />
-                      </Box>
-                    )}
+  return (
+    <Grid item xs={12} sm={6} md={3} key={product.id}>
+      <Box
+        sx={{
+          border: '1px solid #ccc',
+          borderRadius: '4px',
+          padding: 2,
+          textAlign: 'center',
+          position: 'relative',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+        }}
+      >
+        {isDiscountActive && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              backgroundColor: 'red',
+              color: 'white',
+              padding: '4px 8px',
+              borderRadius: '0 0 4px 0',
+            }}
+          >
+            ¡Oferta!
+          </Box>
+        )}
 
-                    {/* Nombre (link al detalle) */}
-                    <Typography
-                      variant="h6"
-                      component={Link}
-                      to={`/store/product/${product.id}`}
-                      sx={{
-                        textDecoration: 'none',
-                        color: 'inherit',
-                        '&:hover': {
-                          textDecoration: 'underline',
-                        },
-                      }}
-                    >
-                      {product.name}
-                    </Typography>
+        {product.imageUrl && (
+          <Box
+            sx={{
+              width: '100%',
+              height: '180px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              marginBottom: '8px',
+            }}
+          >
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              style={{
+                width: 'auto',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+          </Box>
+        )}
 
-                    {/* Mostrar Precios */}
-                    {isDiscountActive ? (
-                      <Box sx={{ mt: 1, mb: 2 }}>
-                        <Typography
-                          variant="body2"
-                          sx={{ textDecoration: 'line-through', color: 'gray' }}
-                        >
-                          ${originalPrice.toFixed(2)}
-                        </Typography>
-                        <Typography
-                          variant="h6"
-                          sx={{ color: 'red', fontWeight: 'bold' }}
-                        >
-                          ${finalPrice.toFixed(2)}
-                        </Typography>
+        <Typography
+          variant="h6"
+          component={Link}
+          to={`/store/product/${product.id}`}
+          sx={{
+            textDecoration: 'none',
+            color: 'inherit',
+            '&:hover': {
+              textDecoration: 'underline',
+            },
+          }}
+        >
+          {product.name}
+        </Typography>
 
-                        {discountReason && (
-                          <Typography
-                            variant="body2"
-                            sx={{ color: 'red', fontStyle: 'italic' }}
-                          >
-                            {discountReason}
-                          </Typography>
-                        )}
-                      </Box>
-                    ) : (
-                      <Typography variant="h6" sx={{ my: 2 }}>
-                        ${originalPrice.toFixed(2)}
-                      </Typography>
-                    )}
+        {/* Mostrar stock disponible basado en lo agregado al carrito */}
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          Stock disponible: {availableStock} unidades
+        </Typography>
 
-                    {/* Botón Agregar al Carrito */}
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleAddToCart(product)}
-                    >
-                      Agregar al Carrito
-                    </Button>
-                  </Box>
-                </Grid>
-              );
-            })}
+        {isDiscountActive ? (
+          <Box sx={{ mt: 1, mb: 2 }}>
+            <Typography
+              variant="body2"
+              sx={{ textDecoration: 'line-through', color: 'gray' }}
+            >
+              ${originalPrice.toFixed(2)}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{ color: 'red', fontWeight: 'bold' }}
+            >
+              ${finalPrice.toFixed(2)}
+            </Typography>
+            {discountReason && (
+              <Typography
+                variant="body2"
+                sx={{ color: 'red', fontStyle: 'italic' }}
+              >
+                {discountReason}
+              </Typography>
+            )}
+          </Box>
+        ) : (
+          <Typography variant="h6" sx={{ my: 2 }}>
+            ${originalPrice.toFixed(2)}
+          </Typography>
+        )}
+
+        {/* Botón Agregar al Carrito */}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => handleAddToCart(product, availableStock)}
+        >
+          Agregar al Carrito
+        </Button>
+      </Box>
+    </Grid>
+  );
+})}
+
           </Grid>
         )}
 

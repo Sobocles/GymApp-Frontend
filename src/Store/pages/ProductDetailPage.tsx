@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  IconButton, 
-  Grid, 
-  Divider, 
-  Chip, 
+import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
+import {
+  Box,
+  Typography,
+  Button,
+  IconButton,
+  Grid,
+  Divider,
+  Chip,
   Stack,
   Skeleton,
   useTheme,
-  useMediaQuery 
+  useMediaQuery
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -66,10 +66,12 @@ const ProductDetailPage: React.FC = () => {
   const { items: cartItems } = useSelector((state: RootState) => state.cart);
   const { isAuth } = useSelector((state: RootState) => state.auth);
 
+  // Se busca si ya existe este producto en el carrito
   const cartItem = cartItems.find(item => item.product.id === Number(id));
   const quantityInCart = cartItem ? cartItem.quantity : 0;
-
-  const [quantity, setQuantity] = useState(1); // Inicializar en 1
+  
+  // Estado local para la cantidad a agregar desde el detalle
+  const [quantity, setQuantity] = useState(1); 
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -98,7 +100,26 @@ const ProductDetailPage: React.FC = () => {
 
   const handleAddToCart = () => {
     if (product) {
-      dispatch(addToCart({ product, quantity })); // Usar la cantidad local
+      // Calculamos el stock disponible: stock total del producto - cantidad ya en el carrito
+      const availableStock = product.stock - quantityInCart;
+      
+      // Validamos que el stock disponible sea suficiente para la cantidad que se quiere agregar
+      if (availableStock >= quantity) {
+        dispatch(addToCart({ product, quantity })); // Agrega la cantidad seleccionada
+        Swal.fire({
+          title: '¡Agregado!',
+          text: `Has agregado ${quantity} unidad${quantity > 1 ? 'es' : ''} de "${product.name}" al carrito.`,
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          title: 'Sin stock',
+          text: 'Lo sentimos, no hay suficientes unidades disponibles para agregar.',
+          icon: 'error',
+        });
+      }
     }
   };
 
@@ -147,7 +168,10 @@ const ProductDetailPage: React.FC = () => {
     );
   }
 
+  // Obtenemos datos del descuento
   const { originalPrice, finalPrice, isDiscountActive, discountReason } = getDiscountedPrice(product);
+  // Calculamos el stock disponible en detalle (stock total - cantidad en carrito)
+  const availableStock = product.stock - quantityInCart;
 
   return (
     <Box sx={{ p: 3, maxWidth: 1200, margin: '0 auto' }}>
@@ -216,54 +240,60 @@ const ProductDetailPage: React.FC = () => {
             {product.description || 'Sin descripción disponible.'}
           </Typography>
 
+          {/* Mostrar precio y, a continuación, stock restante */}
           <Box sx={{ mb: 4 }}>
-  {isDiscountActive ? (
-    <Stack direction="row" alignItems="center" spacing={2}>
-      <Typography
-        variant="h4"
-        sx={{
-          color: theme.palette.error.main,
-          fontWeight: 700
-        }}
-      >
-        ${finalPrice.toFixed(2)} c/u
-      </Typography>
-      <Typography
-        variant="h6"
-        sx={{
-          textDecoration: 'line-through',
-          color: theme.palette.text.disabled
-        }}
-      >
-        ${originalPrice.toFixed(2)}
-      </Typography>
-    </Stack>
-  ) : (
-    <Typography
-      variant="h4"
-      sx={{
-        fontWeight: 700,
-        color: theme.palette.text.primary
-      }}
-    >
-      ${originalPrice.toFixed(2)} c/u
-    </Typography>
-  )}
-  
-  {/* Agregar el total */}
-  <Typography variant="h6" sx={{ mt: 2 }}>
-    Total: ${(finalPrice * quantityInCart).toFixed(2)}
-  </Typography>
+            {isDiscountActive ? (
+              <Stack direction="row" alignItems="center" spacing={2}>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    color: theme.palette.error.main,
+                    fontWeight: 700
+                  }}
+                >
+                  ${finalPrice.toFixed(2)} c/u
+                </Typography>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    textDecoration: 'line-through',
+                    color: theme.palette.text.disabled
+                  }}
+                >
+                  ${originalPrice.toFixed(2)}
+                </Typography>
+              </Stack>
+            ) : (
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 700,
+                  color: theme.palette.text.primary
+                }}
+              >
+                ${originalPrice.toFixed(2)} c/u
+              </Typography>
+            )}
+            
+            {/* Mostrar stock disponible en detalle */}
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              Stock disponible: {availableStock} {availableStock === 1 ? 'unidad' : 'unidades'}
+            </Typography>
 
-  {discountReason && (
-    <Chip
-      label={discountReason}
-      color="info"
-      size="small"
-      sx={{ mt: 1, fontSize: '0.9rem' }}
-    />
-  )}
-</Box>
+            {/* Mostrar el total basado en la cantidad en el carrito (si fuera necesario) */}
+            <Typography variant="h6" sx={{ mt: 2 }}>
+              Total: ${(finalPrice * quantityInCart).toFixed(2)}
+            </Typography>
+
+            {discountReason && (
+              <Chip
+                label={discountReason}
+                color="info"
+                size="small"
+                sx={{ mt: 1, fontSize: '0.9rem' }}
+              />
+            )}
+          </Box>
 
           <Divider sx={{ my: 3 }} />
 
@@ -314,6 +344,7 @@ const ProductDetailPage: React.FC = () => {
             variant="contained"
             color="primary"
             onClick={handleBuyNow}
+            disabled={availableStock <= 0} // Se deshabilita si no hay stock
             size="large"
             fullWidth
             sx={{
@@ -324,6 +355,7 @@ const ProductDetailPage: React.FC = () => {
           >
             Comprar ahora ({quantity} unidades)
           </Button>
+
             
             <Button
               variant="outlined"
