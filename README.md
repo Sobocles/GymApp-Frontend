@@ -57,7 +57,6 @@ contraseña: 123456Kawakami
 ---
 
 ## 🎥 Demo  
-![Dashboard Administrativo](https://via.placeholder.com/600x400)  
 **Enlace a Demo**:<br>
 https://i.imgur.com/X9hTezN.png<br>
 https://i.imgur.com/sx1uKPU.png<br>
