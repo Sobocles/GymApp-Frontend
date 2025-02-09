@@ -31,10 +31,12 @@ const TrainerSessionsCalendar: React.FC = () => {
 
   useEffect(() => {
     const fetchSessions = async () => {
+      console.log("aqui el id del usuario",userId);
       if (!userId) return;
 
       try {
         const response = await apiClient.get(`/clients/${userId}/sessions`);
+        console.log("aqui las sesiones",response);
         const sessions = response.data.map((event: CalendarEventDTO) => ({
           title: event.title,
           start: new Date(event.start),

@@ -50,7 +50,7 @@ const TrainerCalendarPage: React.FC = () => {
  
     console.log("AQUI ESTA EL ID DEL ENTRENADOR",trainerId);
   useEffect(() => {
-    console.log("AQUI ESTA EL ID DEL ENTRENADOR",trainerId);
+    console.log("aqui calendario usuario");
     const fetchEvents = async () => {
         console.log("AQUI ESTA EL ID DEL ENTRENADOR",trainerId);
       if (!trainerId) {

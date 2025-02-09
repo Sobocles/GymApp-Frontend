@@ -48,6 +48,12 @@ export const menuItems: MenuItem[] = [
     roles: ['ROLE_USER'],
   },
   {
+    label: 'Reservar horario personal trainer',
+    path: '/trainers/my-calendar',
+    icon: CalendarTodayIcon,
+    roles: ['ROLE_USER'],
+  },
+  {
     label: 'Usuarios',
     path: '/admin/users/page/0',
     icon: PeopleIcon,
@@ -120,12 +126,13 @@ export const menuItems: MenuItem[] = [
     icon: ShoppingCartIcon,
     roles: ['ROLE_ADMIN'],
   },
+  /*
   {
     label: 'Calendario',
     path: '/dashboard/calendar',
     icon: CalendarTodayIcon,
     roles: ['ROLE_USER'],
-  },
+  }, */
   {
     label: 'Asignar Disponibilidad',
     path: '/admin/trainer-availability',
@@ -138,42 +145,41 @@ export const menuItems: MenuItem[] = [
     icon: MedicalInformationIcon,
     roles: ['ROLE_TRAINER'],
   },
+  /*
   {
     label: 'Agregar Rutina',
     path: '/trainers/clients/1/routines/add',
     icon: FitnessCenterIcon,
     roles: ['ROLE_TRAINER'],
-  },
+  }, */
   {
     label: 'Mediciones',
     path: '/users/measurements',
     icon: MeasurementsIcon,
     roles: ['ROLE_USER'],
   },
+  /*
   {
     label: 'Clases Grupales',
     path: '/admin/group-classes/create',
     icon: FitnessCenterIcon,
     roles: ['ROLE_ADMIN'],
-  },
+  }, */
+  /*
   {
     label: 'Asignar Entrenador a Clase',
     path: '/admin/group-classes/assign-trainer',
     icon: AssignmentIndIcon,
     roles: ['ROLE_ADMIN'],
-  },
+  }, */
+  /*
   {
     label: 'Clases Disponibles',
     path: '/users/group-classes/available',
     icon: FitnessCenterIcon,
     roles: ['ROLE_USER'],
-  },
-  {
-    label: 'Mi Calendario (Trainer)',
-    path: '/trainers/my-calendar',
-    icon: CalendarTodayIcon,
-    roles: ['ROLE_TRAINER'],
-  },
+  }, */
+
 
   // ⚠️ Antes estaba “Facturas” suelto, lo eliminamos para agruparlo en “Productos”:
   // {

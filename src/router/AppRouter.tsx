@@ -137,7 +137,12 @@ export const AppRouter = () => {
           element={isAuth ? <TrainerSessionsCalendar /> : <Navigate to="/auth/login" />} 
         />
 
-          <Route path="trainer-calendar" element={isAuth ? <TrainerCalendar /> : <Navigate to="/auth/login" />} />
+<Route
+  path="trainers/my-calendar"
+  element={isAuth ? <TrainerCalendar /> : <Navigate to="/auth/login" />}
+/>
+
+
 
           <Route path="*" element={<Navigate to="/" />} />
         </Route>

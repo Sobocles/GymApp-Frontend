@@ -90,7 +90,8 @@ export const ProductList: React.FC<Props> = ({ products, onEdit, onDelete }) => 
                 variant="outlined"
                 color="primary"
                 onClick={() => onEdit(p)}
-                sx={{ mr: 1 }}
+                sx={{ mr: 1, mb: 1, width: '120px' }} 
+                
               >
                 Editar
               </Button>
@@ -98,6 +99,7 @@ export const ProductList: React.FC<Props> = ({ products, onEdit, onDelete }) => 
                 variant="outlined"
                 color="error"
                 onClick={() => onDelete(p.id!)}
+                sx={{ width: '120px' }} 
               >
                 Eliminar
               </Button>

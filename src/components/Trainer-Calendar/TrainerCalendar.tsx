@@ -69,6 +69,7 @@ const TrainerCalendar: React.FC = () => {
 
   // Interceptor con token
   useEffect(() => {
+    console.log("Aqui calendario usuario")
     if (token) {
       apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       console.log("[useEffect - token] Token actualizado:", token);

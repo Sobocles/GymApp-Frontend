@@ -33,8 +33,7 @@ export const TrainerProfileEditPage: React.FC = () => {
       .email('Correo electrónico no válido')
       .required('El correo es requerido'),
     password: Yup.string()
-      .min(6, 'La contraseña debe tener al menos 6 caracteres')
-      .required('La contraseña es obligatoria'),
+      .min(6, 'La contraseña debe tener al menos 6 caracteres'),
     file: Yup.mixed().notRequired(),
     instagramUrl: Yup.string().notRequired(),
     whatsappNumber: Yup.string().notRequired(),
@@ -46,31 +45,36 @@ export const TrainerProfileEditPage: React.FC = () => {
     email: login.user?.email || '',
     password: '',
     file: null as File | null,
-
+    instagramUrl: login.user?.trainerDetails?.instagramUrl || '',
+    whatsappNumber: login.user?.trainerDetails?.whatsappNumber || '',
   };
+  
+  
 
   const handleSubmit = async (
-
-
-      
     values: typeof initialValues,
     { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
   ) => {
     const formData = new FormData();
     formData.append('username', values.username);
     formData.append('email', values.email);
+    
     if (values.password) {
       formData.append('password', values.password);
     }
+    
     if (values.file) {
       formData.append('file', values.file);
     }
+    
+    // Agregamos los nuevos campos
+    formData.append('instagramUrl', values.instagramUrl || '');
+    formData.append('whatsappNumber', values.whatsappNumber || '');
+    
     try {
       const updatedUser = await updateTrainerProfile(formData);
-      console.log("aqui esta el usuario/trainer actualizado",updatedUser);
-  
-
-      
+      console.log("Usuario/trainer actualizado:", updatedUser);
+    
       dispatch(updateProfile(updatedUser));
       Swal.fire({
         icon: 'success',
@@ -88,6 +92,7 @@ export const TrainerProfileEditPage: React.FC = () => {
       setSubmitting(false);
     }
   };
+  
 
   return (
     <Box
