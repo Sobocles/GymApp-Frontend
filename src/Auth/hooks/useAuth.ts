@@ -8,7 +8,7 @@ import { onLogin, onLogout, updateProfile } from '../store/auth/authSlice';
 
 import { RootState } from '../../store';
 import { AxiosError } from 'axios';
-import { UserInterface } from '../Interfaces/UserInterface';
+import { UserInterface } from '../../Auth/Interfaces/UserInterface';
 import apiClient from '../../Apis/apiConfig';
 export const useAuth = () => {
   const dispatch = useDispatch();
@@ -70,13 +70,12 @@ const user: UserInterface = {
           const trainerData = trainerResponse.data;
           console.log("Trainer encontrado:", trainerData);
       
-          // Reemplazar el id de usuario con el id del entrenador
           user.id = trainerData.id;
       
           // ACTUALIZA EL TRAINER ID EN REDUX
           dispatch(updateProfile({
             ...user,
-            id: trainerData.id  // Reemplazamos el id con el del trainer
+            id: trainerData.id  
           }));
         } catch (error) {
           console.error("Error obteniendo trainerId:", error);

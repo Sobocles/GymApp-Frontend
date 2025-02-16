@@ -96,13 +96,7 @@ export const menuItems: MenuItem[] = [
     roles: ['ROLE_TRAINER', 'ROLE_USER'],
   },
   {
-    // ⚠️ Antes estaba “Gestión de Productos” suelto, lo eliminamos para agruparlo con Facturas en un dropdown
-    // label: 'Gestión de Productos',
-    // path: '/admin/store/products',
-    // icon: ShoppingCartIcon,
-    // roles: ['ROLE_ADMIN'],
 
-    // Nuevo item "Productos" con submenú:
     label: 'Productos',
     path: '#',
     icon: ShoppingCartIcon,

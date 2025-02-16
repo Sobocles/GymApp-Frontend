@@ -76,10 +76,6 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
   };
   // Al enviar el formulario
   const handleSubmitFormik = async (values: typeof initialValues) => {
-
-    const discountStart = values.discountStart ? `${values.discountStart}` : '';
-    const discountEnd = values.discountEnd ? `${values.discountEnd}` : '';
-    // Construimos el formData
     const formData = new FormData();
     formData.append('name', values.name);
     formData.append('description', values.description);
@@ -90,31 +86,21 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
     formData.append('flavor', values.flavor);
     formData.append('discountPercent', values.discountPercent?.toString() || '');
     formData.append('discountReason', values.discountReason || '');
-    formData.append('discountStart', discountStart);
-    formData.append('discountEnd', discountEnd);
-
-
-    console.log("aqui el form data",formData);
-
-
+    formData.append('discountStart', values.discountStart || '');
+    formData.append('discountEnd', values.discountEnd || '');
+  
     if (values.imageFile) {
       formData.append('image', values.imageFile);
     }
-
-    console.log("aqui el form data",formData);
-
-    // Diferenciamos crear o editar
+  
     if (productSelected) {
-      const response = await onUpdate(productSelected.id!, formData);
-      console.log(response)
+      await onUpdate(productSelected.id!, formData);
     } else {
       await onCreate(formData);
     }
-
-    console.log("aqui el form data",formData);
-
     onClose();
   };
+  
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">

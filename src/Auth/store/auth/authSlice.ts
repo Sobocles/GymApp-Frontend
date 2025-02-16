@@ -1,7 +1,7 @@
 // src/store/auth/authSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AuthState } from '../../Interfaces/AuthState';
-import { UserInterface } from '../../Interfaces/UserInterface';
+import { UserInterface } from '../../../Auth/Interfaces/UserInterface';
 
 
 
