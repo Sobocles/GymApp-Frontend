@@ -2,7 +2,7 @@
 
 import { UserInterface } from '../../Auth/Interfaces/UserInterface';
 import apiClient from '../../Apis/apiConfig';
-import axios from 'axios';
+
 
 // src/Trainers/services/TrainerService.ts
 

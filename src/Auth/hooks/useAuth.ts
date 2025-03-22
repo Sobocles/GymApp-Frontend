@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/Auth/hooks/useAuth.ts
 
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +12,7 @@ import { RootState } from '../../store';
 import { AxiosError } from 'axios';
 import { UserInterface } from '../../Auth/Interfaces/UserInterface';
 import apiClient from '../../Apis/apiConfig';
+import { LoginCredentials } from '../Interfaces/AuthInterface';
 export const useAuth = () => {
   const dispatch = useDispatch();
   const { user, isAdmin, trainer, isAuth, roles, token } = useSelector(
@@ -20,13 +23,17 @@ export const useAuth = () => {
   // Handler para el login
   const handlerLogin = async (
     { email, password }: LoginCredentials,
-    from?: string // Agregamos el parámetro 'from' opcional
+    from?: string 
   ) => {
     try {
       const response = await loginUser({ email, password });
 
 
-      const token = response.data.token;
+      const token = response?.data?.token;
+    if (!token) {
+      throw new Error("No se recibió token en la respuesta.");
+    }
+
       console.log("aqui el token",token);
       const claims = JSON.parse(window.atob(token.split(".")[1]));
       console.log("aqui los claims",claims);
@@ -57,7 +64,6 @@ const user: UserInterface = {
   email: claims.sub || email,
   admin: claims.isAdmin || false,
   trainer: claims.isTrainer || false,
-  // <-- ¡AQUÍ!: roles como array de strings
   roles: rolesArray,
   profileImageUrl: claims.profileImageUrl || '',
 };
@@ -155,7 +161,3 @@ const user: UserInterface = {
   };
 }; 
 
-export interface LoginCredentials {
-    password: string;
-    email: string;
-}

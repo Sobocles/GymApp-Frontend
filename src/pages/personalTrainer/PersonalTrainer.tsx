@@ -204,9 +204,7 @@ const PersonalTrainerPage = () => {
           // Tarifa mensual del entrenador
           const monthlyFee = trainer.monthlyFee || 0;
 
-          // SI QUIERES COBRAR 12 MESES DE ENTRENADOR (plan anual), puedes hacer:
-          //   let trainerPrice = onlyTrainer ? monthlyFee : monthlyFee * (plan?.durationMonths ?? 1);
-          // Pero si de momento sólo sumas "mes actual", dejas:
+
           const trainerPrice = onlyTrainer
             ? monthlyFee
             : monthlyFee * (plan?.durationMonths ?? 1);

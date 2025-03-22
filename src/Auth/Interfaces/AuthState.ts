@@ -7,7 +7,7 @@ export interface AuthState {
   isAuth: boolean;
   isAdmin: boolean;
   trainer?: boolean;
-  roles: string[]; // Array de roles en formato string
+  roles: string[]; 
   token: string | null;
   profileImageUrl?: string; 
   errorMessage?: string;

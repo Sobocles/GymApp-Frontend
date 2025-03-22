@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
+import { useParams, useLocation, useNavigate} from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -18,9 +18,10 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import { getProductById, createProductPreference } from '../../Store/services/ProductService';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart, increaseQuantity, decreaseQuantity, Product } from '../../Store/Store/slices/cartSlice';
+import { addToCart } from '../../Store/Store/slices/cartSlice';
 import { RootState } from '../../store';
 import Swal from 'sweetalert2';
+import { Product } from '../interface/Product';
 
 function getDiscountedPrice(product: Product) {
   const now = new Date();

@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import './RegisterPage.css';
-import { registerUser } from '../../services/authService';
+import { register } from '../../services/authService';
 
 export const RegistrationPage = () => {
     const navigate = useNavigate();
@@ -35,7 +36,7 @@ export const RegistrationPage = () => {
                     password: values.password,
                 });
 
-                // Si el registro fue exitoso mostramos el mensaje y redirigimos
+               
                 Swal.fire({
                     icon: 'success',
                     title: 'Registro exitoso',
@@ -45,7 +46,7 @@ export const RegistrationPage = () => {
                     navigate('/auth/login');
                 });
             } catch (error: any) {
-                // Si el backend envía un mensaje específico, se captura y muestra
+               
                 if (error.response && error.response.data && error.response.data.message) {
                     const errorMessage: string = error.response.data.message;
                     // Validación para correo duplicado

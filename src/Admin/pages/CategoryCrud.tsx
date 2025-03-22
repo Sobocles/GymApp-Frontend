@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import apiClient from '../../Apis/apiConfig';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
@@ -212,7 +213,7 @@ export const CategoryCrud: React.FC = () => {
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ handleSubmit, values }) => (
+          {({ handleSubmit }) => (
             <Form onSubmit={handleSubmit}>
               <DialogTitle>
                 {selectedCategory ? 'Editar Categoría' : 'Crear Categoría'}

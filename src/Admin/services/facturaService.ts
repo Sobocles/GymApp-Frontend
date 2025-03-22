@@ -5,18 +5,7 @@ import { AxiosResponse } from "axios";
 // import { PaymentPlanDTO } from "./FinancialService";
 import { PaymentPlanDTO, PaymentProductDTO  }from "../../Store/interface/Payment"
 
-// Define la interfaz de un PaymentProductDTO
-/*
-export interface PaymentProductDTO {
-  paymentId: number;
-  username: string;
-  paymentMethod: string | null;
-  paymentDate: string;  // o Date
-  transactionAmount: number;
-  productName: string;
-} */
 
-// Define la interfaz de la estructura paginada que retorna el backend
 export interface FacturasPage {
   content: PaymentProductDTO[];
   totalPages: number;

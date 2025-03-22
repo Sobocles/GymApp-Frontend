@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/Calendar/TrainerCalendar.tsx
 import React, { useEffect, useState } from 'react';
 import { Calendar, dateFnsLocalizer, SlotInfo, Event } from 'react-big-calendar';
@@ -143,9 +145,9 @@ const TrainerCalendar: React.FC = () => {
   const handleSelectEvent = async (event: CalendarEvent) => {
     console.log("Al hacer clic en un event (slot disponible)");
     const slotInfo: SlotInfo = {
-      start: event.start,
-      end: event.end,
-      slots: [event.start],
+      start: event.start!,  
+      end: event.end!,
+      slots: [event.start!],
       action: 'select',
     };
     setSelectedSlot(slotInfo);
@@ -174,7 +176,7 @@ const TrainerCalendar: React.FC = () => {
     setOpenDialog(true);
   };
 
-  // Al hacer clic en un slot vacío
+
   const handleSelectSlot = (slotInfo: SlotInfo) => {
     console.log("Al hacer clic en un slot vacío");
     setBookingStatus({
@@ -282,25 +284,25 @@ const TrainerCalendar: React.FC = () => {
 
       {trainerId ? (
         <Calendar
-        key={location.key}
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: 600 }}
-        selectable
-        onSelectSlot={handleSelectSlot}
-        onSelectEvent={handleSelectEvent}
-        views={['week']}             // Solo mostramos la vista de semana
-        defaultView="week"           // Vista por defecto 'week'
-        popup
-          eventPropGetter={() => ({
-            style: {
-              backgroundColor: 'green',
-              color: 'white',
-            },
-          })}
-        />
+  localizer={localizer}
+  events={events}
+  startAccessor="start"
+  endAccessor="end"
+  style={{ height: 600 }}
+  selectable
+  onSelectSlot={handleSelectSlot}
+  onSelectEvent={handleSelectEvent}
+  views={['week']}
+  defaultView="week"
+  popup
+  eventPropGetter={() => ({
+    style: {
+      backgroundColor: 'green',
+      color: 'white',
+    },
+  })}
+/>
+
       ) : (
         <Alert severity="warning">
           No tienes un entrenador personal asignado.

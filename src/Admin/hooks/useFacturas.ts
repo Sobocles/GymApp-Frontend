@@ -1,6 +1,7 @@
 // src/Admin/hooks/useFacturas.ts
 import { useState, useEffect } from "react";
-import { PaymentProductDTO, FacturasPage, getFacturasPage } from "../services/facturaService";
+import { FacturasPage, getFacturasPage } from "../services/facturaService";
+import { PaymentProductDTO } from "../../Store/interface/Payment";
 
 interface PaginatorState {
   number: number;

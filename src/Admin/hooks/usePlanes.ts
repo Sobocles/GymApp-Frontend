@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/Admin/hooks/usePlanes.ts
 import { useState, useEffect } from "react";
-import { PaymentPlanDTO, PlanesPage, getPlanesPage } from "../services/facturaService";
+import {  PlanesPage, getPlanesPage } from "../services/facturaService";
+import { PaymentPlanDTO } from "../../Store/interface/Payment";
 
 interface PaginatorState {
   number: number;
@@ -25,7 +27,7 @@ export const usePlanes = (currentPage: number, searchTerm: string) => {
       setIsLoading(true);
       setError(null);
 
-      // Asumiendo que getPlanesPage acepta un tercer parámetro para búsqueda
+
       const response = await getPlanesPage(page, 6, search);
       const data: PlanesPage = response.data;
       setPlanes(data.content);
@@ -52,6 +54,6 @@ export const usePlanes = (currentPage: number, searchTerm: string) => {
     paginator,
     isLoading,
     error,
-    reloadPlanes: fetchPlanesPage, // por si necesitas recargar manualmente
+    reloadPlanes: fetchPlanesPage, 
   };
 };

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import {
@@ -13,7 +14,9 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField
+  TextField,
+  CircularProgress,
+  Box
 } from '@mui/material';
 import apiClient from '../../Apis/apiConfig'; 
 
@@ -34,9 +37,14 @@ const AdminPlanCrudPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Estados para controlar el modal
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
   const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null);
+
+  // Estados de carga para operaciones específicas
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [archivingPlanId, setArchivingPlanId] = useState<number | null>(null);
 
   // Estado del form
   const [planData, setPlanData] = useState<IPlan>({
@@ -68,7 +76,7 @@ const AdminPlanCrudPage: React.FC = () => {
 
   const handleOpenCreate = () => {
     setDialogMode('create');
-    setPlanData({ name: '', price: 0, description: '', discount: 0, discountReason: '' });
+    setPlanData({ name: '', price: 0, description: '', discount: 0, discountReason: '', durationMonths: 1 });
     setSelectedPlanId(null);
     setOpenDialog(true);
   };
@@ -81,43 +89,55 @@ const AdminPlanCrudPage: React.FC = () => {
       price: plan.price,
       description: plan.description || '',
       discount: plan.discount || 0,
-      discountReason: plan.discountReason || '', // <-- nuevo
+      discountReason: plan.discountReason || '',
       versionNumber: plan.versionNumber,
-      active: plan.active
+      active: plan.active,
+      durationMonths: plan.durationMonths || 1
     });
     setOpenDialog(true);
   };
 
   const handleSave = async () => {
-    if (dialogMode === 'create') {
-      try {
+    // Validación básica
+    if (!planData.name || planData.price <= 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Datos incompletos',
+        text: 'Por favor, completa todos los campos obligatorios.',
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      if (dialogMode === 'create') {
         await apiClient.post('/plans', planData);
-        setOpenDialog(false);
-        fetchPlans();
-      } catch (err) {
-        console.error('Error al crear plan:', err);
         Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Ocurrió un error al crear el plan.',
+          icon: 'success',
+          title: 'Plan creado',
+          text: 'El plan ha sido creado con éxito.',
         });
-      }
-    } else if (dialogMode === 'edit' && selectedPlanId) {
-      try {
+      } else if (dialogMode === 'edit' && selectedPlanId) {
         await apiClient.put(`/plans/${selectedPlanId}`, planData);
-        setOpenDialog(false);
-        fetchPlans();
-      } catch (err) {
-        console.error('Error al actualizar plan:', err);
         Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Ocurrió un error al actualizar el plan.',
+          icon: 'success',
+          title: 'Plan actualizado',
+          text: 'El plan ha sido actualizado con éxito.',
         });
       }
+      setOpenDialog(false);
+      fetchPlans();
+    } catch (err) {
+      console.error(`Error al ${dialogMode === 'create' ? 'crear' : 'actualizar'} plan:`, err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: `Ocurrió un error al ${dialogMode === 'create' ? 'crear' : 'actualizar'} el plan.`,
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
 
   const handleArchive = async (id: number) => {
     const result = await Swal.fire({
@@ -133,9 +153,15 @@ const AdminPlanCrudPage: React.FC = () => {
 
     if (!result.isConfirmed) return;
     
+    setArchivingPlanId(id);
     try {
       await apiClient.delete(`/plans/${id}`);
       fetchPlans();
+      Swal.fire({
+        icon: 'success',
+        title: 'Plan archivado',
+        text: 'El plan ha sido archivado con éxito.',
+      });
     } catch (err) {
       console.error('Error al archivar el plan:', err);
       Swal.fire({
@@ -143,9 +169,16 @@ const AdminPlanCrudPage: React.FC = () => {
         title: 'Error',
         text: 'No se pudo archivar el plan.',
       });
+    } finally {
+      setArchivingPlanId(null);
     }
   };
 
+  const handleCloseDialog = () => {
+    if (!isSubmitting) {
+      setOpenDialog(false);
+    }
+  };
 
   return (
     <Container maxWidth="lg">
@@ -153,11 +186,23 @@ const AdminPlanCrudPage: React.FC = () => {
         Gestión de Planes
       </Typography>
 
-      <Button variant="contained" color="primary" onClick={handleOpenCreate} sx={{ mb: 2 }}>
+      <Button 
+        variant="contained" 
+        color="primary" 
+        onClick={handleOpenCreate} 
+        sx={{ mb: 2 }}
+        disabled={loading}
+      >
         Crear Nuevo Plan
       </Button>
 
-      {loading && <Typography>Cargando planes...</Typography>}
+      {/* Indicador de carga principal */}
+      {loading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+          <CircularProgress />
+        </Box>
+      )}
+      
       {error && <Typography color="error">{error}</Typography>}
 
       {!loading && !error && plans.length > 0 && (
@@ -167,8 +212,9 @@ const AdminPlanCrudPage: React.FC = () => {
               <TableCell>ID</TableCell>
               <TableCell>Nombre</TableCell>
               <TableCell>Precio</TableCell>
+              <TableCell>Duración (meses)</TableCell>
               <TableCell>Descuento (%)</TableCell>
-              <TableCell>Razón Descuento</TableCell>{/* Nuevo */}
+              <TableCell>Razón Descuento</TableCell>
               <TableCell>Versión</TableCell>
               <TableCell>Activo</TableCell>
               <TableCell>Acciones</TableCell>
@@ -180,6 +226,7 @@ const AdminPlanCrudPage: React.FC = () => {
                 <TableCell>{plan.id}</TableCell>
                 <TableCell>{plan.name}</TableCell>
                 <TableCell>${plan.price}</TableCell>
+                <TableCell>{plan.durationMonths || 1}</TableCell>
                 <TableCell>{plan.discount || 0}%</TableCell>
                 <TableCell>{plan.discountReason || '--'}</TableCell>
                 <TableCell>{plan.versionNumber}</TableCell>
@@ -190,7 +237,8 @@ const AdminPlanCrudPage: React.FC = () => {
                     size="small"
                     color="info"
                     onClick={() => handleOpenEdit(plan)}
-                    sx={{ mr: 1 }}
+                    sx={{ mr: 1, mb: 1 }}
+                    disabled={loading || archivingPlanId === plan.id}
                   >
                     Editar/Versionar
                   </Button>
@@ -199,8 +247,26 @@ const AdminPlanCrudPage: React.FC = () => {
                     size="small"
                     color="warning"
                     onClick={() => handleArchive(plan.id!)}
+                    disabled={loading || archivingPlanId !== null}
+                    sx={{ position: 'relative', minWidth: '90px' }}
                   >
-                    Archivar
+                    {archivingPlanId === plan.id ? (
+                      <>
+                        <CircularProgress
+                          size={24}
+                          sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            marginTop: '-12px',
+                            marginLeft: '-12px',
+                          }}
+                        />
+                        <span style={{ visibility: 'hidden' }}>Archivar</span>
+                      </>
+                    ) : (
+                      'Archivar'
+                    )}
                   </Button>
                 </TableCell>
               </TableRow>
@@ -209,7 +275,19 @@ const AdminPlanCrudPage: React.FC = () => {
         </Table>
       )}
 
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+      {!loading && !error && plans.length === 0 && (
+        <Typography variant="body1" sx={{ mt: 2 }}>
+          No hay planes registrados.
+        </Typography>
+      )}
+
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog} 
+        maxWidth="sm" 
+        fullWidth
+        disableEscapeKeyDown={isSubmitting}
+      >
         <DialogTitle>
           {dialogMode === 'create' ? 'Crear Plan' : 'Editar / Versionar Plan'}
         </DialogTitle>
@@ -221,6 +299,8 @@ const AdminPlanCrudPage: React.FC = () => {
             margin="normal"
             value={planData.name}
             onChange={(e) => setPlanData({ ...planData, name: e.target.value })}
+            disabled={isSubmitting}
+            required
           />
           <TextField
             label="Precio"
@@ -230,17 +310,22 @@ const AdminPlanCrudPage: React.FC = () => {
             margin="normal"
             value={planData.price}
             onChange={(e) => setPlanData({ ...planData, price: Number(e.target.value) })}
+            disabled={isSubmitting}
+            required
+            inputProps={{ min: 0 }}
           />
           <TextField
-              label="Duración (meses)"
-              type="number"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={planData.durationMonths}
-              onChange={(e) => setPlanData({ ...planData, durationMonths: Number(e.target.value) })}
-              inputProps={{ min: 1 }}
-            />
+            label="Duración (meses)"
+            type="number"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={planData.durationMonths}
+            onChange={(e) => setPlanData({ ...planData, durationMonths: Number(e.target.value) })}
+            inputProps={{ min: 1 }}
+            disabled={isSubmitting}
+            required
+          />
           <TextField
             label="Descripción"
             variant="outlined"
@@ -248,6 +333,9 @@ const AdminPlanCrudPage: React.FC = () => {
             margin="normal"
             value={planData.description}
             onChange={(e) => setPlanData({ ...planData, description: e.target.value })}
+            disabled={isSubmitting}
+            multiline
+            rows={3}
           />
           <TextField
             label="Descuento (%)"
@@ -257,6 +345,8 @@ const AdminPlanCrudPage: React.FC = () => {
             margin="normal"
             value={planData.discount}
             onChange={(e) => setPlanData({ ...planData, discount: Number(e.target.value) })}
+            disabled={isSubmitting}
+            inputProps={{ min: 0, max: 100 }}
           />
           <TextField
             label="Razón del Descuento"
@@ -265,14 +355,43 @@ const AdminPlanCrudPage: React.FC = () => {
             margin="normal"
             value={planData.discountReason}
             onChange={(e) => setPlanData({ ...planData, discountReason: e.target.value })}
+            disabled={isSubmitting}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="inherit">
+          <Button 
+            onClick={handleCloseDialog} 
+            color="inherit"
+            disabled={isSubmitting}
+          >
             Cancelar
           </Button>
-          <Button onClick={handleSave} variant="contained" color="primary">
-            {dialogMode === 'create' ? 'Crear' : 'Guardar'}
+          <Button 
+            onClick={handleSave} 
+            variant="contained" 
+            color="primary"
+            disabled={isSubmitting}
+            sx={{ position: 'relative', minWidth: '90px' }}
+          >
+            {isSubmitting ? (
+              <>
+                <CircularProgress
+                  size={24}
+                  sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    marginTop: '-12px',
+                    marginLeft: '-12px',
+                  }}
+                />
+                <span style={{ visibility: 'hidden' }}>
+                  {dialogMode === 'create' ? 'Crear' : 'Guardar'}
+                </span>
+              </>
+            ) : (
+              dialogMode === 'create' ? 'Crear' : 'Guardar'
+            )}
           </Button>
         </DialogActions>
       </Dialog>

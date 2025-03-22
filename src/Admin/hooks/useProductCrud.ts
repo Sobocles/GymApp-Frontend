@@ -1,5 +1,3 @@
-// src/components/ProductCrud/hooks/useProductCrud.ts
-
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import {
@@ -36,16 +34,31 @@ export const useProductCrud = (currentPage: number, searchTerm: string) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  
+  // Estados de carga
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
 
   // Cargar categorías e inicial (similar a fetchAllAndFilter / fetchProductsPage)
   useEffect(() => {
-    if (searchTerm.trim() === '') {
-      fetchProductsPage();
-      fetchCategories();
-    } else {
-      fetchAllAndFilter();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        if (searchTerm.trim() === '') {
+          await fetchProductsPage();
+          await fetchCategories();
+        } else {
+          await fetchAllAndFilter();
+        }
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
   }, [currentPage, searchTerm]);
 
   // Obtener productos paginados
@@ -96,38 +109,86 @@ export const useProductCrud = (currentPage: number, searchTerm: string) => {
 
   // Crear producto
   const handlerCreateProduct = async (formData: FormData) => {
+    setIsSubmitting(true);
     try {
       await createProduct(formData);
-      Swal.fire('Producto creado', 'El producto ha sido creado con éxito.', 'success');
       await fetchProductsPage();
+      setOpenDialog(false); // Cerrar el modal después de éxito
+      Swal.fire({
+        title: 'Producto creado',
+        text: 'El producto ha sido creado con éxito.',
+        icon: 'success'
+      });
     } catch (error) {
       console.error('Error al crear producto:', error);
-      Swal.fire('Error', 'Ocurrió un error al guardar el producto.', 'error');
+      Swal.fire({
+        title: 'Error',
+        text: 'Ocurrió un error al guardar el producto.',
+        icon: 'error'
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // Editar producto
   const handlerUpdateProduct = async (id: number, formData: FormData) => {
-    console.log("aqui la form data",formData);
+    setIsSubmitting(true);
     try {
       await updateProduct(id, formData);
-      Swal.fire('Producto actualizado', 'El producto ha sido actualizado con éxito.', 'success');
       await fetchProductsPage();
+      setOpenDialog(false); // Cerrar el modal después de éxito
+      Swal.fire({
+        title: 'Producto actualizado',
+        text: 'El producto ha sido actualizado con éxito.',
+        icon: 'success'
+      });
     } catch (error) {
       console.error('Error al actualizar producto:', error);
-      Swal.fire('Error', 'Ocurrió un error al guardar el producto.', 'error');
+      Swal.fire({
+        title: 'Error',
+        text: 'Ocurrió un error al guardar el producto.',
+        icon: 'error'
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // Eliminar producto
   const handlerDeleteProduct = async (productId: number) => {
-    try {
-      await deleteProduct(productId);
-      await fetchProductsPage();
-      Swal.fire('Producto eliminado', 'El producto ha sido eliminado con éxito.', 'success');
-    } catch (error) {
-      console.error('Error al eliminar producto:', error);
-      Swal.fire('Error', 'Ocurrió un error al eliminar el producto.', 'error');
+    // Mostrar confirmación antes de eliminar
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: "Esta acción no se puede revertir",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        setDeletingProductId(productId);
+        await deleteProduct(productId);
+        await fetchProductsPage();
+        Swal.fire({
+          title: 'Producto eliminado',
+          text: 'El producto ha sido eliminado con éxito.',
+          icon: 'success'
+        });
+      } catch (error) {
+        console.error('Error al eliminar producto:', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'Ocurrió un error al eliminar el producto.',
+          icon: 'error'
+        });
+      } finally {
+        setDeletingProductId(null);
+      }
     }
   };
 
@@ -145,8 +206,10 @@ export const useProductCrud = (currentPage: number, searchTerm: string) => {
 
   // Cerrar modal
   const handleCloseDialog = () => {
-    setSelectedProduct(null);
-    setOpenDialog(false);
+    if (!isSubmitting) {
+      setSelectedProduct(null);
+      setOpenDialog(false);
+    }
   };
 
   return {
@@ -155,6 +218,9 @@ export const useProductCrud = (currentPage: number, searchTerm: string) => {
     categories,
     selectedProduct,
     openDialog,
+    isLoading,
+    isSubmitting,
+    deletingProductId,
 
     // funciones
     handlerCreateProduct,

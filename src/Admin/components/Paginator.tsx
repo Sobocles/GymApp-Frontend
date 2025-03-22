@@ -16,7 +16,7 @@ interface PaginatorProps {
 
 export const Paginator = ({ url, paginator, sortBy }: PaginatorProps) => {
 
-  const order = sortBy || '';
+
 
   
 

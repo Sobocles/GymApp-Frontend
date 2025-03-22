@@ -15,4 +15,4 @@ export const bookGroupClass = async (classId: number) => {
   return response.data;
 };
 
-// Ya teníamos createGroupClass y assignTrainerToClass, las dejamos como están.
+

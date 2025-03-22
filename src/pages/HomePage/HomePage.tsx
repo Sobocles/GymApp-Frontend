@@ -111,7 +111,7 @@ const HomePage = () => {
         </div>
         <div className="feature-item" onClick={() => handleFeatureClick('planes')}>
           <img src={img3} alt="Personal trainer" />
-          <p>PLANES DE GIMNACIO + PERSONAL TRAINER</p>
+          <p>PLANES DE GIMNASIO + PERSONAL TRAINER</p>
         </div>
         <div className="feature-item" onClick={() => handleFeatureClick('tienda')}>
           <img src={img4} alt="Medicina deportiva" />

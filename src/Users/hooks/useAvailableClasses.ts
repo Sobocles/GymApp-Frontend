@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/hooks/useAvailableClasses.ts
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';  // Importar SweetAlert
-import { getAvailableGroupClasses, GroupClass, bookGroupClass } from '../../Users/services/groupClassService';
+import { getAvailableGroupClasses, bookGroupClass } from '../../Users/services/groupClassService';
+import { GroupClass } from '../interfaces/GroupClass';
 
 export const useAvailableClasses = () => {
   const [classes, setClasses] = useState<GroupClass[]>([]);

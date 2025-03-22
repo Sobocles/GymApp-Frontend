@@ -50,10 +50,10 @@
 /* Botón para registrar */
 .register-form-2 .btnSubmit {
     color: #fff;
-    background-color: #28a745; /* Verde para diferenciar del login */
+    background-color: #28a745; 
 }
 
-/* Estilo de los grupos de formulario */
+
 .form-group {
     margin-bottom: 15px;
 }
@@ -82,33 +82,70 @@
     margin-bottom: 10px;
     text-align: left;
 }
-/* Agrupación del input y el ícono */
+
 .input-group {
-    position: relative; /* Esto asegura que el ícono se posicione dentro del contenedor del input */
+    position: relative; 
     display: flex;
     align-items: center;
 }
 
-/* Alineación del ícono de ojo dentro del campo de contraseña */
+
 .input-group .input-group-text {
-    position: absolute; /* El ícono se posiciona absolutamente dentro del contenedor relativo */
-    right: 10px; /* Margen derecho para el ícono */
-    top: 50%; /* Coloca el ícono en el centro vertical del input */
-    transform: translateY(-50%); /* Ajusta la posición vertical al centro exacto */
-    background-color: transparent; /* Elimina cualquier fondo por defecto del ícono */
-    border: none; /* Sin borde */
-    cursor: pointer; /* El cursor cambia al puntero cuando se pasa sobre el ícono */
-    font-size: 1.2rem; /* Tamaño del ícono */
+    position: absolute; 
+    right: 10px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    background-color: transparent; 
+    border: none; 
+    cursor: pointer; 
+    font-size: 1.2rem; 
 }
 
-/* Aumentar el padding del input para evitar que el texto se superponga con el ícono */
+
 .input-group input {
-    padding-right: 40px; /* Espacio suficiente para el ícono */
+    padding-right: 40px;
 }
 
-/* Mantener el estilo del input cuando está enfocado */
+
 .input-group input:focus {
-    border-color: #0062cc; /* Color del borde al enfocar */
+    border-color: #0062cc; 
     outline: none;
 }
 
+/* Añade estos estilos a tu archivo RegisterPage.css */
+
+.disabled-link {
+    pointer-events: none;
+    color: #6c757d;
+    text-decoration: none;
+    opacity: 0.65;
+}
+
+.btnSubmit {
+    width: 100%;
+    border-radius: 1rem;
+    padding: 1.5%;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    color: #fff;
+    background-color: #0275d8;
+    transition: all 0.3s ease;
+}
+
+.btnSubmit:hover {
+    background-color: #0069d9;
+}
+
+.btnSubmit:disabled {
+    background-color: #0275d8;
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* Estilos para el spinner */
+.btnSubmit .spinner-border {
+    vertical-align: middle;
+    width: 1.2rem;
+    height: 1.2rem;
+}

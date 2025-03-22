@@ -172,32 +172,46 @@ const CartPage: React.FC = () => {
             <Box display="flex" alignItems="center">
               <IconButton
                 color="primary"
-                onClick={() => dispatch(decreaseQuantity(item.product.id))}
+                onClick={() => dispatch(decreaseQuantity(item.product.id!))}
+
               >
                 <RemoveIcon />
               </IconButton>
               <Typography sx={{ mx: 1 }}>{item.quantity}</Typography>
               <IconButton
-                color="primary"
-                // Deshabilitamos el botón si no hay stock disponible
-                onClick={() => {
-                  if (availableStock > 0) {
-                    dispatch(increaseQuantity(item.product.id));
-                  } else {
-                    Swal.fire({
-                      title: 'Sin stock',
-                      text: 'No hay unidades disponibles para agregar.',
-                      icon: 'error'
-                    });
-                  }
-                }}
-                disabled={availableStock <= 0}
-              >
-                <AddIcon />
-              </IconButton>
+  color="primary"
+  onClick={() => dispatch(decreaseQuantity(item.product.id!))}
+>
+  <RemoveIcon />
+</IconButton>
+<Typography sx={{ mx: 1 }}>{item.quantity}</Typography>
+<IconButton
+  color="primary"
+  onClick={() => {
+    if (availableStock > 0) {
+      dispatch(increaseQuantity(item.product.id!));
+    } else {
+      Swal.fire({
+        title: 'Sin stock',
+        text: 'No hay unidades disponibles para agregar.',
+        icon: 'error'
+      });
+    }
+  }}
+  disabled={availableStock <= 0}
+>
+  <AddIcon />
+</IconButton>
+<IconButton
+  color="error"
+  onClick={() => dispatch(removeFromCart(item.product.id!))}
+>
+  <DeleteIcon />
+</IconButton>
+
               <IconButton
                 color="error"
-                onClick={() => dispatch(removeFromCart(item.product.id))}
+                onClick={() => dispatch(removeFromCart(item.product.id!))}
               >
                 <DeleteIcon />
               </IconButton>

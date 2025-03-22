@@ -38,6 +38,3 @@ export interface UserInterface {
 
 
 
-
-
-

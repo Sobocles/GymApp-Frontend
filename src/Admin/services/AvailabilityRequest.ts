@@ -27,7 +27,7 @@ export const fetchAvailableTrainers = async (
   startTime: string,  // "HH:mm"
   endTime: string     // "HH:mm"
 ): Promise<PersonalTrainerDto[]> => {
-  const response = await apiClient.get('/trainer-schedule/available', {  // Endpoint corregido
+  const response = await apiClient.get('/trainer-schedule/available', {  
     params: { day, startTime, endTime },
   });
   console.log("ACA LA RESPONSE", response);

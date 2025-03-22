@@ -17,29 +17,25 @@ export const loginUser = async ({ email, password }: LoginCredentials) => {
   }
 };
 
-export const registerUser = async (userData: {
+export const register = async (userData: {
   username: string;
   email: string;
-  password: string;
+  password?: string;
 }) => {
   try {
-
-    const response = await axios.post('http://localhost:8080/users/register', userData, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-  
-    return response.data;
+    // Endpoint público que no requiere autenticación
+    const response = await apiClient.post('/users/register', userData);
+    return response;
   } catch (error) {
-    handleApiError(error);
+    console.error("[UserService] Error en registro:", error);
+    throw error;
   }
 };
 
 // Función para manejar errores
 const handleApiError = (error: unknown) => {
   if (axios.isAxiosError(error)) {
-    // Retiras el throw de new Error y simplemente relanzas el error original
+  
     throw error; 
   }
   // Si no es un AxiosError, aquí lanzas algo genérico

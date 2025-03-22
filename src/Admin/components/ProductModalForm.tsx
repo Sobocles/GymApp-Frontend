@@ -12,6 +12,7 @@ import {
   Select,
   MenuItem,
   TextField,
+  CircularProgress,
 } from '@mui/material';
 
 import { Formik, Form, Field, ErrorMessage } from 'formik';
@@ -29,6 +30,7 @@ interface ProductModalFormProps {
   categories: Category[];
   onCreate: (formData: FormData) => void;
   onUpdate: (id: number, formData: FormData) => void;
+  isSubmitting: boolean;
 }
 
 // Esquema de validación con Yup
@@ -36,7 +38,7 @@ const validationSchema = Yup.object().shape({
   name: Yup.string().required('El nombre es requerido'),
   description: Yup.string()
     .required('La descripción es requerida')
-    .max(200, 'La descripción no puede tener más de 200 caracteres'),
+    .max(500, 'La descripción no puede tener más de 500 caracteres'),
   category: Yup.string().required('La categoría es requerida'),
   price: Yup.number()
     .min(0, 'El precio debe ser mayor o igual a 0')
@@ -55,6 +57,7 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
   categories,
   onCreate,
   onUpdate,
+  isSubmitting,
 }) => {
   
   // Valores iniciales para Formik
@@ -98,7 +101,9 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
     } else {
       await onCreate(formData);
     }
-    onClose();
+    
+    // No cerramos el modal aquí, lo hará el hook cuando termine la operación
+    // onClose();
   };
   
 
@@ -111,7 +116,7 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
         validationSchema={validationSchema}
         onSubmit={handleSubmitFormik}
       >
-        {({ setFieldValue, handleSubmit }) => (
+        {({ setFieldValue, handleSubmit, isValid, dirty }) => (
           // Notar que aquí `<Form>` engloba TANTO <DialogContent> COMO <DialogActions>
           <Form onSubmit={handleSubmit}>
             <DialogTitle>
@@ -127,6 +132,7 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
                     label="Nombre"
                     fullWidth
                     margin="normal"
+                    disabled={isSubmitting}
                   />
                 )}
               </Field>
@@ -144,6 +150,7 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
                     margin="normal"
                     multiline
                     rows={3}
+                    disabled={isSubmitting}
                   />
                 )}
               </Field>
@@ -154,7 +161,7 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
               {/* Campo: category */}
               <Field name="category">
                 {({ field }: any) => (
-                  <FormControl fullWidth margin="normal">
+                  <FormControl fullWidth margin="normal" disabled={isSubmitting}>
                     <InputLabel id="select-category-label">Categoría</InputLabel>
                     <Select
                       labelId="select-category-label"
@@ -185,6 +192,7 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
                     label="Marca"
                     fullWidth
                     margin="normal"
+                    disabled={isSubmitting}
                   />
                 )}
               </Field>
@@ -200,6 +208,7 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
                     label="Sabor"
                     fullWidth
                     margin="normal"
+                    disabled={isSubmitting}
                   />
                 )}
               </Field>
@@ -216,6 +225,7 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
                     type="number"
                     fullWidth
                     margin="normal"
+                    disabled={isSubmitting}
                   />
                 )}
               </Field>
@@ -230,6 +240,7 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
                 type="number"
                 fullWidth
                 margin="normal"
+                disabled={isSubmitting}
               />
             )}
           </Field>
@@ -241,6 +252,7 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
                 label="Razón de la Oferta"
                 fullWidth
                 margin="normal"
+                disabled={isSubmitting}
               />
             )}
           </Field>
@@ -254,6 +266,7 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
                 fullWidth
                 margin="normal"
                 InputLabelProps={{ shrink: true }} // Para mostrar la etiqueta arriba
+                disabled={isSubmitting}
               />
             )}
           </Field>
@@ -267,6 +280,7 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
                 fullWidth
                 margin="normal"
                 InputLabelProps={{ shrink: true }}
+                disabled={isSubmitting}
               />
             )}
           </Field>
@@ -283,6 +297,7 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
                     type="number"
                     fullWidth
                     margin="normal"
+                    disabled={isSubmitting}
                   />
                 )}
               </Field>
@@ -302,15 +317,40 @@ export const ProductModalForm: React.FC<ProductModalFormProps> = ({
                       setFieldValue('imageFile', event.currentTarget.files[0]);
                     }
                   }}
+                  disabled={isSubmitting}
                 />
               </div>
             </DialogContent>
 
             {/* Botones dentro del mismo <Form> */}
             <DialogActions>
-              <Button onClick={onClose}>Cancelar</Button>
-              <Button type="submit" variant="contained" color="primary">
-                {productSelected ? 'Actualizar' : 'Crear'}
+              <Button onClick={onClose} disabled={isSubmitting}>Cancelar</Button>
+              <Button 
+                type="submit" 
+                variant="contained" 
+                color="primary"
+                disabled={isSubmitting || !dirty || !isValid}
+                sx={{ position: 'relative', minWidth: '120px' }}
+              >
+                {isSubmitting ? (
+                  <>
+                    <CircularProgress
+                      size={24}
+                      sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        marginTop: '-12px',
+                        marginLeft: '-12px',
+                      }}
+                    />
+                    <span style={{ visibility: 'hidden' }}>
+                      {productSelected ? 'Actualizar' : 'Crear'}
+                    </span>
+                  </>
+                ) : (
+                  productSelected ? 'Actualizar' : 'Crear'
+                )}
               </Button>
             </DialogActions>
           </Form>

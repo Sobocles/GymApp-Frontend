@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
     // src/Store/services/ProductService.ts
     import apiClient from '../../Apis/apiConfig';
 import { Product } from '../interface/Product';

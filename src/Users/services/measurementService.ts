@@ -1,7 +1,7 @@
 // src/services/measurementService.ts
 
 import apiClient from '../../Apis/apiConfig';
-import { BodyMeasurement } from '../../Trainers/services/trainerClientService';
+import { BodyMeasurement } from '../../Users/models/BodyMeasurement';
 
 
 const getMeasurements = (clientId: number) => {

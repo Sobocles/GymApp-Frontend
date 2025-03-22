@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/ProductCrud/components/ProductList.tsx
-
 import React from 'react';
 import {
   Table,
@@ -8,6 +8,7 @@ import {
   TableCell,
   TableBody,
   Button,
+  CircularProgress,
 } from '@mui/material';
 import { Product } from '../../Store/interface/Product';
 // Importa la función de descuento (ajusta la ruta según corresponda)
@@ -17,9 +18,17 @@ interface Props {
   products: Product[];
   onEdit: (product: Product) => void;
   onDelete: (id: number) => void;
+  isLoading?: boolean;
+  deletingProductId: number | null;
 }
 
-export const ProductList: React.FC<Props> = ({ products, onEdit, onDelete }) => {
+export const ProductList: React.FC<Props> = ({ 
+  products, 
+  onEdit, 
+  onDelete, 
+  isLoading = false,
+  deletingProductId 
+}) => {
   return (
     <Table>
       <TableHead>
@@ -28,15 +37,11 @@ export const ProductList: React.FC<Props> = ({ products, onEdit, onDelete }) => 
         <TableCell><strong>Nombre</strong></TableCell>
         <TableCell><strong>Descripción</strong></TableCell>
         <TableCell><strong>Categoría</strong></TableCell>
-        <TableCell><strong>Stock</strong></TableCell> 
- 
-
+        <TableCell><strong>Stock</strong></TableCell>
         <TableCell><strong>Marca</strong></TableCell>
         <TableCell><strong>Sabor</strong></TableCell>
         <TableCell><strong>Imagen</strong></TableCell>
         <TableCell><strong>Precio</strong></TableCell>
-   
-
         <TableCell><strong>Acciones</strong></TableCell>
       </TableRow>
       </TableHead>
@@ -65,7 +70,6 @@ export const ProductList: React.FC<Props> = ({ products, onEdit, onDelete }) => 
               {(() => {
                 // Calcula el precio con descuento para el producto
                 const { originalPrice, finalPrice, isDiscountActive, discountReason } = getDiscountedPrice(p);
-
                 return isDiscountActive ? (
                   <>
                     <span style={{ textDecoration: 'line-through' }}>
@@ -90,8 +94,8 @@ export const ProductList: React.FC<Props> = ({ products, onEdit, onDelete }) => 
                 variant="outlined"
                 color="primary"
                 onClick={() => onEdit(p)}
-                sx={{ mr: 1, mb: 1, width: '120px' }} 
-                
+                sx={{ mr: 1, mb: 1, width: '120px' }}
+                disabled={isLoading || deletingProductId === p.id}
               >
                 Editar
               </Button>
@@ -99,9 +103,26 @@ export const ProductList: React.FC<Props> = ({ products, onEdit, onDelete }) => 
                 variant="outlined"
                 color="error"
                 onClick={() => onDelete(p.id!)}
-                sx={{ width: '120px' }} 
+                sx={{ width: '120px', position: 'relative' }}
+                disabled={isLoading || deletingProductId === p.id}
               >
-                Eliminar
+                {deletingProductId === p.id ? (
+                  <>
+                    <CircularProgress
+                      size={24}
+                      sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        marginTop: '-12px',
+                        marginLeft: '-12px',
+                      }}
+                    />
+                    <span style={{ visibility: 'hidden' }}>Eliminar</span>
+                  </>
+                ) : (
+                  'Eliminar'
+                )}
               </Button>
             </TableCell>
           </TableRow>

@@ -3,9 +3,15 @@ import { useUsers } from '../hooks/useUsers';
 import { UserForm } from './UseForm';
 import { Modal, Box, Typography, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { useAuth } from '../../Auth/hooks/useAuth';
 
 export const UserModalForm = () => {
   const { userSelected, visibleForm, handlerCloseForm, handlerAddUser } = useUsers();
+
+  const { login } = useAuth(); // Asegúrate de importar useAuth
+  
+  console.log('Estado de login al abrir modal:', login); // Añade esto
+  console.log('Token al abrir modal:', sessionStorage.getItem('token')); 
 
   const validUserSelected = userSelected || {
     id: '',

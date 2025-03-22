@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/Users/pages/MeasurementsPage.tsx
 
 import React, { useEffect, useState } from 'react';

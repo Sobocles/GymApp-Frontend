@@ -1,9 +1,16 @@
 // src/components/layout/Header/Header.tsx
-
 import React, { useState, useEffect, MouseEvent } from 'react';
 import {
-  AppBar, Toolbar, Typography, Button, Box, Menu, MenuItem,
-  IconButton, Badge
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  Menu,
+  MenuItem,
+  IconButton,
+  Badge,
+  ButtonProps,
 } from '@mui/material';
 import { styled } from '@mui/system';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
@@ -17,29 +24,35 @@ import { useAuth } from '../../../Auth/hooks/useAuth';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { getAllCategories, Category } from '../../../Store/services/CategoryService';
 
-const NavButton = styled(Button)(({ theme }) => ({
-  color: '#ffffff',
-  margin: theme.spacing(1),
-  transition: 'transform 0.3s, backgroundColor 0.3s',
-  fontSize: '1rem',
-  '&:hover': {
-    backgroundColor: '#f50057',
-    transform: 'scale(1.1)',
-  },
-}));
+interface NavButtonProps extends ButtonProps {
+  to?: string;
+  component?: React.ElementType;
+}
 
-// Ruta base del front (p.ej. "/") y nav items para usuarios no autenticados:
+const NavButton = styled(Button)<NavButtonProps>(
+  ({ theme }) => ({
+    color: '#ffffff',
+    margin: theme.spacing(1),
+    transition: 'transform 0.3s, backgroundColor 0.3s',
+    fontSize: '1rem',
+    '&:hover': {
+      backgroundColor: '#f50057',
+      transform: 'scale(1.1)',
+    },
+  })
+);
+
+
+
+// Menú público: solo "Inicio" y "Servicios"
 const publicNavItems = [
   { label: 'Inicio', path: '/' },
-  { label: 'Nosotros', path: '/about' },
   { label: 'Servicios', path: '/services' },
-  { label: 'Contacto', path: '/contact' },
 ];
 
 function getDashboardPath(roles: string[]): string {
   if (roles.includes('ROLE_ADMIN')) return '/admin/dashboard';
   if (roles.includes('ROLE_TRAINER')) return '/trainers/dashboard';
-  // Por defecto, un user normal
   return '/dashboard';
 }
 
@@ -47,23 +60,20 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const { login, handlerLogout } = useAuth();
 
-  // Roles del usuario
-  const userRoles = login.user?.roles?.map(r => 
-    typeof r === 'string' ? r : r.authority
-  ) || [];
+  const userRoles = login.user?.roles || [];
+
 
   // Carrito
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Categorías tienda
+  // Categorías para el menú "Tienda"
   const [categories, setCategories] = useState<Category[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [anchorElCart, setAnchorElCart] = useState<null | HTMLElement>(null);
 
-  // Cargar las categorías
   useEffect(() => {
-    const load = async () => {
+    const loadCategories = async () => {
       try {
         const c = await getAllCategories();
         setCategories(c);
@@ -71,10 +81,10 @@ const Header: React.FC = () => {
         console.error('Error al cargar categorías', error);
       }
     };
-    load();
+    loadCategories();
   }, []);
 
-  // Menú de tienda
+  // Funciones para el menú de tienda
   const handleStoreMenuOpen = (e: MouseEvent<HTMLElement>) => {
     setAnchorEl(e.currentTarget);
   };
@@ -82,7 +92,7 @@ const Header: React.FC = () => {
     setAnchorEl(null);
   };
 
-  // Carrito
+  // Funciones para el menú del carrito
   const handleCartClick = (e: MouseEvent<HTMLElement>) => {
     setAnchorElCart(e.currentTarget);
   };
@@ -96,7 +106,6 @@ const Header: React.FC = () => {
     handleStoreMenuClose();
   };
 
-  // Botón para ir al dashboard según rol
   const goToDashboard = () => {
     const dashPath = getDashboardPath(userRoles);
     navigate(dashPath);
@@ -122,19 +131,19 @@ const Header: React.FC = () => {
           GymPro
         </Typography>
 
-        {/* Menú principal (solo para no autenticados o para todos) */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', flexGrow: 1 }}>
+        {/* Menú principal (botones) alineados a la izquierda */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-start', flexGrow: 1, ml: 10 }}>
           {publicNavItems.map((item) => (
             <NavButton
-              key={item.label}
-              component={RouterLink}
-              to={item.path}
-            >
-              {item.label}
-            </NavButton>
-          ))}
+  key={item.label}
+  component={RouterLink}
+  to={item.path}
+>
+  {item.label}
+</NavButton>
 
-          {/* Tienda (desplegable) */}
+          ))}
+          {/* Botón de "Tienda" con menú desplegable */}
           <NavButton onClick={handleStoreMenuOpen}>Tienda</NavButton>
           <Menu
             anchorEl={anchorEl}
@@ -155,7 +164,7 @@ const Header: React.FC = () => {
           </Menu>
         </Box>
 
-        {/* Carrito */}
+        {/* Icono del carrito */}
         <IconButton sx={{ color: '#ffffff' }} onClick={handleCartClick}>
           <Badge badgeContent={totalItems} color="error">
             <ShoppingCartIcon />
@@ -186,8 +195,11 @@ const Header: React.FC = () => {
                         src={item.product.imageUrl}
                         alt={item.product.name}
                         style={{
-                          width: 60, height: 60, objectFit: 'cover',
-                          marginRight: 12, borderRadius: 8
+                          width: 60,
+                          height: 60,
+                          objectFit: 'cover',
+                          marginRight: 12,
+                          borderRadius: 8
                         }}
                       />
                       <Box>
@@ -219,36 +231,25 @@ const Header: React.FC = () => {
           </Box>
         </Menu>
 
-        {/* Aquí el bloque de autenticación */}
+        {/* Bloque de autenticación */}
         {login.isAuth ? (
           <>
-            {/* Botón "Ir a mi Dashboard" */}
             <IconButton sx={{ color: '#ffffff', ml: 1 }} onClick={goToDashboard}>
               <DashboardIcon />
             </IconButton>
-            {/* Nombre de usuario (opcional) */}
             <Typography sx={{ ml: 2, mr: 2 }}>
               Hola, {login.user?.username}
             </Typography>
-            {/* Botón cerrar sesión */}
             <Button color="inherit" onClick={handlerLogout}>
               Cerrar Sesión
             </Button>
           </>
         ) : (
           <>
-            <Button
-              color="inherit"
-              component={RouterLink}
-              to="/auth/login"
-            >
+            <Button color="inherit" component={RouterLink} to="/auth/login">
               Iniciar Sesión
             </Button>
-            <Button
-              color="inherit"
-              component={RouterLink}
-              to="/auth/register"
-            >
+            <Button color="inherit" component={RouterLink} to="/auth/register">
               Registrarse
             </Button>
           </>

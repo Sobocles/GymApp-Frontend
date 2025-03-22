@@ -1,6 +1,7 @@
+// src/components/layout/ProductForm.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import {
   DialogTitle,
@@ -15,13 +16,14 @@ import {
   Button,
 } from '@mui/material';
 import { Category } from '../../Store/services/CategoryService';
+import { FormErrorMessage } from '../components/FormErrorMessage';
 
 // Esquema de validación
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('El nombre es requerido'),
   description: Yup.string()
     .required('La descripción es requerida')
-    .max(300, 'La descripción no puede tener más de 200 caracteres'),
+    .max(500, 'La descripción no puede tener más de 500 caracteres'),
   category: Yup.string().required('La categoría es requerida'),
   price: Yup.number().min(0, 'El precio debe ser mayor o igual a 0').required('El precio es requerido'),
   brand: Yup.string().required('La marca es requerida'),
@@ -49,17 +51,15 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       validationSchema={validationSchema}
       onSubmit={(values, { resetForm }) => {
         onSubmit(values);
-        // Opcional: si quieres limpiar los campos
+        // Opcional: resetear el formulario
         resetForm();
       }}
     >
       {({ setFieldValue, handleSubmit }) => (
-        // El <Form> engloba el DialogTitle, DialogContent y DialogActions
         <Form onSubmit={handleSubmit}>
           <DialogTitle>
             {initialValues?.name ? 'Editar Producto' : 'Crear Producto'}
           </DialogTitle>
-
           <DialogContent dividers>
             {/* Nombre */}
             <Field name="name">
@@ -67,7 +67,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 <TextField {...field} label="Nombre" fullWidth margin="normal" />
               )}
             </Field>
-            <ErrorMessage name="name" component={Typography} color="error" />
+            <FormErrorMessage name="name" />
 
             {/* Descripción */}
             <Field name="description">
@@ -82,7 +82,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 />
               )}
             </Field>
-            <ErrorMessage name="description" component={Typography} color="error" />
+            <FormErrorMessage name="description" />
 
             {/* Categoría */}
             <Field name="category">
@@ -102,7 +102,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 </FormControl>
               )}
             </Field>
-            <ErrorMessage name="category" component={Typography} color="error" />
+            <FormErrorMessage name="category" />
 
             {/* Marca */}
             <Field name="brand">
@@ -110,7 +110,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 <TextField {...field} label="Marca" fullWidth margin="normal" />
               )}
             </Field>
-            <ErrorMessage name="brand" component={Typography} color="error" />
+            <FormErrorMessage name="brand" />
 
             {/* Sabor */}
             <Field name="flavor">
@@ -118,7 +118,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 <TextField {...field} label="Sabor" fullWidth margin="normal" />
               )}
             </Field>
-            <ErrorMessage name="flavor" component={Typography} color="error" />
+            <FormErrorMessage name="flavor" />
 
             {/* Precio */}
             <Field name="price">
@@ -126,7 +126,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 <TextField {...field} label="Precio" type="number" fullWidth margin="normal" />
               )}
             </Field>
-            <ErrorMessage name="price" component={Typography} color="error" />
+            <FormErrorMessage name="price" />
 
             {/* Stock */}
             <Field name="stock">
@@ -134,7 +134,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 <TextField {...field} label="Stock" type="number" fullWidth margin="normal" />
               )}
             </Field>
-            <ErrorMessage name="stock" component={Typography} color="error" />
+            <FormErrorMessage name="stock" />
 
             {/* Imagen (opcional) */}
             <div style={{ marginTop: '1rem' }}>

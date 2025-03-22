@@ -1,12 +1,13 @@
 export interface Plan {
-    id?: number;
+    id: number;
     name: string;
     price: number;
     description?: string;
     discount?: number;
-    discountReason?: string; // <-- nuevo
+    discountReason?: string; 
     versionNumber?: number;
     active?: boolean;
+    durationMonths?: number;
   }
   
   

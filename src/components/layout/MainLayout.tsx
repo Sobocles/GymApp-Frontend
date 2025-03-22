@@ -20,10 +20,8 @@ const MainLayout = () => {
   const location = useLocation();
   const currentPath = location.pathname.toLowerCase();
 
-  // Roles del usuario
-  const userRoles = user?.roles?.map((r) =>
-    typeof r === 'string' ? r : r.authority
-  ) || [];
+  const userRoles = user?.roles || [];
+
 
   // Verificamos si es una ruta protegida (para mostrar/u ocultar sidebar)
   const isProtectedRoute = PROTECTED_PATHS.some((protectedPath) =>
